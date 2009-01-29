@@ -268,6 +268,8 @@ IF (WIN32)
       cmGlobalVisualStudio9Generator.h
       cmGlobalVisualStudio8Win64Generator.cxx
       cmGlobalVisualStudio8Win64Generator.h
+      cmGlobalVisualStudio8WMGenerator.cxx
+      cmGlobalVisualStudio8WMGenerator.h
       cmGlobalVisualStudio9Win64Generator.cxx
       cmGlobalVisualStudio9Win64Generator.h
       cmGlobalVisualStudioGenerator.cxx
@@ -311,7 +313,7 @@ IF(MSVC)
     # comsuppd did not yet exist in VS6
     TARGET_LINK_LIBRARIES(CMakeLib comsupp)
   ELSE(MSVC60)
-    TARGET_LINK_LIBRARIES(CMakeLib optimized comsupp debug comsuppd)
+    TARGET_LINK_LIBRARIES(CMakeLib optimized comsuppw debug comsuppwd)
   ENDIF(MSVC60)
 ENDIF(MSVC)
 
