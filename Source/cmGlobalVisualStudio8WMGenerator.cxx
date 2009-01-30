@@ -31,6 +31,24 @@ cmLocalGenerator *cmGlobalVisualStudio8WMGenerator::CreateLocalGenerator()
                                       cmCacheManager::STRING);
     }
 
+  cmCacheManager::CacheIterator it = GetCMakeInstance()->GetCacheManager()->
+                                     GetCacheIterator("CMAKE_WINDOWS_MOBILE_PLATFORM");
+  if (!it.PropertyExists("VALID_VALUES"))
+    {
+    std::string validPlatformValues;
+    for (InstalledSDKsMap::const_iterator vv = this->InstalledSDKs.begin();
+         vv != this->InstalledSDKs.end();
+         ++vv)
+      {
+      if (!validPlatformValues.empty())
+        validPlatformValues += ";";
+
+      validPlatformValues += vv->first;
+      }
+
+    it.SetProperty("VALID_VALUES", validPlatformValues.c_str());
+    }
+
   cmLocalVisualStudio7Generator *lg = new cmLocalVisualStudio7Generator;
   lg->SetVersion8();
   lg->SetPlatformName(this->PlatformName.c_str());
