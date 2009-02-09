@@ -88,6 +88,7 @@
 #include "cmSetSourceFilesPropertiesCommand.cxx"
 #include "cmSetTargetPropertiesCommand.cxx"
 #include "cmSetTestsPropertiesCommand.cxx"
+#include "cmSetValidValuesCommand.cxx"
 #include "cmGetTestPropertyCommand.cxx"
 #include "cmSiteNameCommand.cxx"
 #include "cmStringCommand.cxx"
@@ -161,6 +162,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmSetTargetPropertiesCommand);
   commands.push_back(new cmGetTestPropertyCommand);
   commands.push_back(new cmSetTestsPropertiesCommand);
+  commands.push_back(new cmSetValidValuesCommand);
   commands.push_back(new cmSiteNameCommand);
   commands.push_back(new cmStringCommand);
   commands.push_back(new cmSubdirCommand);

@@ -365,6 +365,11 @@ void QCMakeCacheModel::setPropertyData(const QModelIndex& idx1,
   }
   this->setData(idx2, prop.Help, QCMakeCacheModel::HelpRole);
 
+  if (!prop.ValidValues.isEmpty())
+  {
+    this->setData(idx1, prop.ValidValues, QCMakeCacheModel::ValidValuesRole);
+  }
+
   if(isNew)
   {
     this->setData(idx1, QBrush(QColor(255,100,100)), Qt::BackgroundColorRole);
@@ -572,10 +577,60 @@ QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p,
         SLOT(setFileDialogFlag(bool)));
     return editor;
     }
+  else if(type == QCMakeProperty::STRING &&
+          var.data(QCMakeCacheModel::ValidValuesRole).isValid())
+    {
+    QComboBox* editor = new QComboBox(p);
+    editor->setFrame(false);
+    return editor;
+    }
 
   return new QLineEdit(p);
 }
-  
+
+void QCMakeCacheModelDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+{
+  QModelIndex var = index.sibling(index.row(), 0);
+  int type = var.data(QCMakeCacheModel::TypeRole).toInt();
+
+  if(type == QCMakeProperty::STRING &&
+     var.data(QCMakeCacheModel::ValidValuesRole).isValid())
+    {
+    QString validValues = var.data(QCMakeCacheModel::ValidValuesRole).toString();
+    QString curValue = index.data(Qt::DisplayRole).toString();
+    QStringList validList = validValues.split(';');
+    int validIndex = validList.indexOf(curValue);
+
+    QComboBox* combo = qobject_cast<QComboBox*>(editor);
+    combo->addItems(validList);
+    combo->setCurrentIndex(validIndex);
+    }
+  else
+    {
+    QItemDelegate::setEditorData(editor, index);
+    }
+}
+
+void QCMakeCacheModelDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
+                                            const QModelIndex &index) const
+{
+  QModelIndex var = index.sibling(index.row(), 0);
+  int type = var.data(QCMakeCacheModel::TypeRole).toInt();
+
+  if(type == QCMakeProperty::STRING &&
+     var.data(QCMakeCacheModel::ValidValuesRole).isValid())
+    {
+    QComboBox* combo = qobject_cast<QComboBox*>(editor);
+    QString value = combo->currentText();
+    model->setData(index, value, Qt::DisplayRole);
+    }
+  else
+    {
+    QItemDelegate::setModelData(editor, model, index);
+    }
+}
+
+
 bool QCMakeCacheModelDelegate::editorEvent(QEvent* e, QAbstractItemModel* model, 
        const QStyleOptionViewItem& option, const QModelIndex& index)
 {
@@ -618,7 +673,7 @@ bool QCMakeCacheModelDelegate::editorEvent(QEvent* e, QAbstractItemModel* model,
                           ? Qt::Unchecked : Qt::Checked);
   return model->setData(index, state, Qt::CheckStateRole);
 }
-  
+
 bool QCMakeCacheModelDelegate::eventFilter(QObject* object, QEvent* event)
 {
   // workaround for what looks like a bug in Qt on Mac OS X
@@ -628,7 +683,6 @@ bool QCMakeCacheModelDelegate::eventFilter(QObject* object, QEvent* event)
     {
     return false;
     }
+
   return QItemDelegate::eventFilter(object, event);
 }
-
-  

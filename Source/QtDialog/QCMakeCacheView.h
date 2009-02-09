@@ -20,6 +20,7 @@
 
 #include "QCMake.h"
 #include <QTreeView>
+#include <QComboBox>
 #include <QStandardItemModel>
 #include <QItemDelegate>
 
@@ -70,7 +71,8 @@ public:
   // properties, and the advanced flag
   enum { HelpRole = Qt::ToolTipRole,
          TypeRole = Qt::UserRole, 
-         AdvancedRole };
+         AdvancedRole,
+         ValidValuesRole };
 
   enum ViewType { FlatView, GroupView };
 
@@ -142,9 +144,12 @@ public:
   QCMakeCacheModelDelegate(QObject* p);
   /// create our own editors for cache properties
   QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, 
-      const QModelIndex& index ) const;
+                        const QModelIndex& index ) const;
+  void setEditorData(QWidget *editor, const QModelIndex &index) const;
+  void setModelData(QWidget *editor, QAbstractItemModel *model,
+                    const QModelIndex &index) const;
   bool editorEvent (QEvent* event, QAbstractItemModel* model, 
-       const QStyleOptionViewItem& option, const QModelIndex& index);
+                    const QStyleOptionViewItem& option, const QModelIndex& index);
   bool eventFilter(QObject* object, QEvent* event);
 protected slots:
   void setFileDialogFlag(bool);

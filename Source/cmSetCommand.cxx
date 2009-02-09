@@ -168,10 +168,35 @@ bool cmSetCommand
   // if it is meant to be in the cache then define it in the cache
   if(cache)
     {
+    // Check whether the value we going to set is valid for this variable
+    if (!it.IsAtEnd() && force && it.PropertyExists("VALID_VALUES"))
+      {
+      std::string valid_values(it.GetProperty("VALID_VALUES"));
+
+      std::string search_string = ';' + valid_values + ';';
+      std::string value_to_search = ';' + value + ';';
+
+      // valid values now enumerated in following way:
+      // ;value1;value2;..;
+      // so search for ;value; occurence in it
+      bool has_valid_value = search_string.find(value_to_search) != std::string::npos;
+
+      if (!has_valid_value)
+        {
+        std::replace(valid_values.begin(), valid_values.end(), ';', ',');
+        std::string msg("Invalid value(\"" + value + "\"). Valid values for the ");
+        msg += variable;
+        msg += " variable are: ";
+        msg += valid_values;
+        this->SetError(msg.c_str());
+        return false;
+        }
+      }
+
     this->Makefile->AddCacheDefinition(variable,
-                                   value.c_str(),
-                                   docstring,
-                                   type);
+                                       value.c_str(),
+                                       docstring,
+                                       type);
     }
   else
     {
