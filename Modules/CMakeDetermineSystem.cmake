@@ -60,6 +60,10 @@ ELSE(CMAKE_HOST_UNIX)
   ENDIF(CMAKE_HOST_WIN32)
 ENDIF(CMAKE_HOST_UNIX)
 
+IF(CMAKE_GENERATOR MATCHES "Symbian SDK .mmp projects")
+  SET(CMAKE_SYSTEM_NAME "Symbian")
+ENDIF(CMAKE_GENERATOR MATCHES "Symbian SDK .mmp projects")
+
 # if a toolchain file is used, the user wants to cross compile.
 # in this case read the toolchain file and keep the CMAKE_HOST_SYSTEM_*
 # variables around so they can be used in CMakeLists.txt. 

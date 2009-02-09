@@ -155,6 +155,8 @@ SET(SRCS
   cmGeneratedFileStream.cxx
   cmGlobalGenerator.cxx
   cmGlobalGenerator.h
+  cmGlobalSymbianMmpGenerator.cxx
+  cmGlobalSymbianMmpGenerator.h
   cmGlobalUnixMakefileGenerator3.cxx
   cmGlobalUnixMakefileGenerator3.h
   cmGraphAdjacencyList.h
@@ -174,6 +176,8 @@ SET(SRCS
   cmListFileLexer.c
   cmLocalGenerator.cxx
   cmLocalGenerator.h
+  cmLocalSymbianMmpGenerator.cxx
+  cmLocalSymbianMmpGenerator.h
   cmLocalUnixMakefileGenerator3.cxx
   cmMakeDepend.cxx
   cmMakeDepend.h
@@ -201,6 +205,7 @@ SET(SRCS
   cmSourceFileLocation.h
   cmSourceGroup.cxx
   cmSourceGroup.h
+  cmSymbianResource.h
   cmSystemTools.cxx
   cmSystemTools.h
   cmTarget.cxx

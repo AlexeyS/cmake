@@ -747,7 +747,8 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   // Check whether this is a DLL platform.
   this->DLLPlatform = (this->Makefile->IsOn("WIN32") ||
                        this->Makefile->IsOn("CYGWIN") ||
-                       this->Makefile->IsOn("MINGW"));
+                       this->Makefile->IsOn("MINGW") ||
+                       this->Makefile->IsOn("SYMBIAN"));
 
   // Setup default property values.
   this->SetPropertyDefault("INSTALL_NAME_DIR", "");
@@ -1370,6 +1371,9 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
       case cmTarget::OPTIMIZED:
         dependencies += "optimized";
         break;
+      case cmTarget::IMPORT:
+        dependencies += "import";
+        break;
       }
     dependencies += ";";
     dependencies += lib;
@@ -1659,6 +1663,10 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
         else if (l == "general")
           {
           llt = cmTarget::GENERAL;
+          }
+        else if (l == "import")
+          {
+          llt = cmTarget::IMPORT;
           }
         else
           {
