@@ -252,6 +252,8 @@ public:
                    std::vector<std::string>::const_iterator first,
                    std::vector<std::string>::const_iterator last);
 
+  bool HaveSubdirectory(const std::string& path);
+
 protected:
   // for a project collect all its targets by following depend
   // information, and also collect all the targets

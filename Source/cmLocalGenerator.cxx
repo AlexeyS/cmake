@@ -2903,3 +2903,22 @@ void cmLocalGenerator::GenerateFrameworkInfoPList(cmTarget* target,
   mf->ConfigureFile(inFile.c_str(), fname, false, false, false);
   mf->PopScope();
 }
+
+//----------------------------------------------------------------------------
+bool cmLocalGenerator::HaveSubdirectory(const std::string& path)
+{
+  if (this->Makefile->GetStartDirectory() == path)
+    {
+    return true;
+    }
+
+  unsigned int i;
+  for (i = 0; i < this->Children.size(); ++i)
+    {
+    if (this->Children[i]->HaveSubdirectory(path))
+      {
+      return true;
+      }
+    }
+  return false;
+}

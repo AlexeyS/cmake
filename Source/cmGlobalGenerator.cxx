@@ -2032,6 +2032,19 @@ cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
 }
 
 //----------------------------------------------------------------------------
+bool cmGlobalGenerator::HaveSubdirectory(const std::string& path)
+{
+    for (int i = 0; i < LocalGenerators.size(); ++i)
+      {
+      if (LocalGenerators[i]->HaveSubdirectory(path))
+        {
+        return true;
+        }
+      }
+    return false;
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalGenerator::CheckRuleHashes()
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
