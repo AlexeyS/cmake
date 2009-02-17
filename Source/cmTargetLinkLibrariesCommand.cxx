@@ -16,11 +16,12 @@
 =========================================================================*/
 #include "cmTargetLinkLibrariesCommand.h"
 
-const char* cmTargetLinkLibrariesCommand::LinkLibraryTypeNames[3] =
+const char* cmTargetLinkLibrariesCommand::LinkLibraryTypeNames[4] =
 {
   "general",
   "debug",
-  "optimized"
+  "optimized",
+  "import"
 };
 
 // cmTargetLinkLibrariesCommand
@@ -104,6 +105,15 @@ bool cmTargetLinkLibrariesCommand
         this->LinkLibraryTypeSpecifierWarning(llt, cmTarget::GENERAL);
         }
       llt = cmTarget::GENERAL;
+      haveLLT = true;
+      }
+    else if(args[i] == "import")
+      {
+      if(haveLLT)
+        {
+        this->LinkLibraryTypeSpecifierWarning(llt, cmTarget::IMPORT);
+        }
+      llt = cmTarget::IMPORT;
       haveLLT = true;
       }
     else if(haveLLT)

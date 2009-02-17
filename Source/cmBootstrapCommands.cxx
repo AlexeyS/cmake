@@ -26,6 +26,8 @@
 #include "cmAddExecutableCommand.cxx"
 #include "cmAddLibraryCommand.cxx"
 #include "cmAddSubDirectoryCommand.cxx"
+#include "cmAddSymbianBitmapCommand.cxx"
+#include "cmAddSymbianResourceCommand.cxx"
 #include "cmAddTestCommand.cxx"
 #include "cmBreakCommand.cxx"
 #include "cmBuildCommand.cxx"
@@ -86,6 +88,7 @@
 #include "cmSetSourceFilesPropertiesCommand.cxx"
 #include "cmSetTargetPropertiesCommand.cxx"
 #include "cmSetTestsPropertiesCommand.cxx"
+#include "cmSetValidValuesCommand.cxx"
 #include "cmGetTestPropertyCommand.cxx"
 #include "cmSiteNameCommand.cxx"
 #include "cmStringCommand.cxx"
@@ -103,6 +106,8 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmAddExecutableCommand);
   commands.push_back(new cmAddLibraryCommand);
   commands.push_back(new cmAddSubDirectoryCommand);
+  commands.push_back(new cmAddSymbianBitmapCommand);
+  commands.push_back(new cmAddSymbianResourceCommand);
   commands.push_back(new cmAddTestCommand);
   commands.push_back(new cmBreakCommand);
   commands.push_back(new cmBuildCommand);
@@ -157,6 +162,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmSetTargetPropertiesCommand);
   commands.push_back(new cmGetTestPropertyCommand);
   commands.push_back(new cmSetTestsPropertiesCommand);
+  commands.push_back(new cmSetValidValuesCommand);
   commands.push_back(new cmSiteNameCommand);
   commands.push_back(new cmStringCommand);
   commands.push_back(new cmSubdirCommand);

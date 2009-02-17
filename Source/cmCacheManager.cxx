@@ -230,14 +230,22 @@ bool cmCacheManager::LoadCache(const char* path,
       }
     while(realbuffer[0] == '/' && realbuffer[1] == '/')
       {
-      if ((realbuffer[2] == '\\') && (realbuffer[3]=='n'))
+      static cmsys::RegularExpression validValuesReg("^\\{(.*)\\}$");
+      if (validValuesReg.find(&realbuffer[2]))
         {
-        e.Properties["HELPSTRING"] += "\n";
-        e.Properties["HELPSTRING"] += &realbuffer[4];
+        e.Properties["VALID_VALUES"] = validValuesReg.match(1);
         }
       else
         {
-        e.Properties["HELPSTRING"] += &realbuffer[2];
+        if ((realbuffer[2] == '\\') && (realbuffer[3]=='n'))
+          {
+          e.Properties["HELPSTRING"] += "\n";
+          e.Properties["HELPSTRING"] += &realbuffer[4];
+          }
+        else
+          {
+          e.Properties["HELPSTRING"] += &realbuffer[2];
+          }
         }
       cmSystemTools::GetLineFromStream(fin, buffer);
       realbuffer = buffer.c_str();
@@ -483,6 +491,13 @@ bool cmCacheManager::SaveCache(const char* path)
         {
         cmCacheManager::OutputHelpString(fout, it->second);
         }
+
+      it = ce.Properties.find("VALID_VALUES");
+      if ( it != ce.Properties.end() )
+        {
+            fout << "//{" << it->second << "}\n";
+        }
+
       std::string key;
       // support : in key name by double quoting
       if((*i).first.find(':') != std::string::npos ||

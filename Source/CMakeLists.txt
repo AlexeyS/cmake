@@ -155,6 +155,8 @@ SET(SRCS
   cmGeneratedFileStream.cxx
   cmGlobalGenerator.cxx
   cmGlobalGenerator.h
+  cmGlobalSymbianMmpGenerator.cxx
+  cmGlobalSymbianMmpGenerator.h
   cmGlobalUnixMakefileGenerator3.cxx
   cmGlobalUnixMakefileGenerator3.h
   cmGraphAdjacencyList.h
@@ -174,6 +176,8 @@ SET(SRCS
   cmListFileLexer.c
   cmLocalGenerator.cxx
   cmLocalGenerator.h
+  cmLocalSymbianMmpGenerator.cxx
+  cmLocalSymbianMmpGenerator.h
   cmLocalUnixMakefileGenerator3.cxx
   cmMakeDepend.cxx
   cmMakeDepend.h
@@ -201,6 +205,7 @@ SET(SRCS
   cmSourceFileLocation.h
   cmSourceGroup.cxx
   cmSourceGroup.h
+  cmSymbianResource.h
   cmSystemTools.cxx
   cmSystemTools.h
   cmTarget.cxx
@@ -268,6 +273,8 @@ IF (WIN32)
       cmGlobalVisualStudio9Generator.h
       cmGlobalVisualStudio8Win64Generator.cxx
       cmGlobalVisualStudio8Win64Generator.h
+      cmGlobalVisualStudio8WMGenerator.cxx
+      cmGlobalVisualStudio8WMGenerator.h
       cmGlobalVisualStudio9Win64Generator.cxx
       cmGlobalVisualStudio9Win64Generator.h
       cmGlobalVisualStudioGenerator.cxx
@@ -311,7 +318,7 @@ IF(MSVC)
     # comsuppd did not yet exist in VS6
     TARGET_LINK_LIBRARIES(CMakeLib comsupp)
   ELSE(MSVC60)
-    TARGET_LINK_LIBRARIES(CMakeLib optimized comsupp debug comsuppd)
+    TARGET_LINK_LIBRARIES(CMakeLib optimized comsuppw debug comsuppwd)
   ENDIF(MSVC60)
 ENDIF(MSVC)
 

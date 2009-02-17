@@ -897,12 +897,25 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
           );
         break;
       case cmCacheManager::STRING:
-        m_CacheEntriesList.AddProperty(key,
-                                       value.c_str(),
-                                       i.GetProperty("HELPSTRING"),
-                                       CPropertyList::EDIT,"",
-                                       reverseOrder, advanced
-          );
+        if (i.PropertyExists("VALID_VALUES"))
+          {
+            std::string variants = i.GetProperty("VALID_VALUES");
+            std::replace(variants.begin(), variants.end(), ';', '|');
+            m_CacheEntriesList.AddProperty(key,
+                                           value.c_str(),
+                                           i.GetProperty("HELPSTRING"),
+                                           CPropertyList::COMBO, variants.c_str(),
+                                           reverseOrder,
+                                           advanced
+              );
+          }
+        else
+          m_CacheEntriesList.AddProperty(key,
+                                         value.c_str(),
+                                         i.GetProperty("HELPSTRING"),
+                                         CPropertyList::EDIT,"",
+                                         reverseOrder, advanced
+            );
         break;
       case cmCacheManager::INTERNAL:
         m_CacheEntriesList.RemoveProperty(key);

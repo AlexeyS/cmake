@@ -107,7 +107,7 @@ public:
   cmTypeMacro(cmTargetLinkLibrariesCommand, cmCommand);
 private:
   void LinkLibraryTypeSpecifierWarning(int left, int right);
-  static const char* LinkLibraryTypeNames[3];
+  static const char* LinkLibraryTypeNames[4];
 
   cmTarget* Target;
   bool DoingInterface;
