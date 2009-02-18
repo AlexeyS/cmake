@@ -46,6 +46,8 @@ void cmLocalSymbianMmpGenerator::writeMmp(cmTarget& target)
   mmp << std::endl;
 
   addDefinitions(target, mmp);
+  addRawData(target, mmp);
+
   addResources(target, mmp);
   addIncludes(mmp);
   addSources(target, mmp);
@@ -93,7 +95,7 @@ std::string cmLocalSymbianMmpGenerator::addGenericOption(cmTarget& target,
   if (raw_value)
     {
     std::string value = raw_value;
-    replaceSemicolonsWithSpaces(value);
+    replaceSemicolons(value, ' ');
     mmp << keyword_with_param(option) << value << std::endl;
     }
 
@@ -122,13 +124,13 @@ void cmLocalSymbianMmpGenerator::addDefinitions(cmTarget& target, std::ostream& 
   bool need_newline = false;
 
   if (writeMacros(mmp, Makefile->GetProperty("COMPILE_DEFINITIONS")))
-      need_newline = true;
+    need_newline = true;
 
   if (writeMacros(mmp, target.GetProperty("COMPILE_DEFINITIONS")))
-      need_newline = true;
+    need_newline = true;
   
   if (need_newline)
-      mmp << std::endl;
+    mmp << std::endl;
 }
 
 void cmLocalSymbianMmpGenerator::addResources(cmTarget& target, std::ostream& mmp)
@@ -203,13 +205,28 @@ void cmLocalSymbianMmpGenerator::addLibraries(cmTarget& target, std::ostream& mm
     }
 }
 
+void cmLocalSymbianMmpGenerator::addRawData(cmTarget& target, std::ostream& mmp)
+{
+  std::string varName = target.GetName();
+  varName += "_SYMBIAN_RAW_DATA";
+  const char* raw_value = Makefile->GetDefinition(varName.c_str());
+
+  if (raw_value)
+    {
+    std::string value = raw_value;
+    replaceSemicolons(value, '\n');
+    mmp << value << std::endl;
+    mmp << std::endl;
+    }
+}
+
 bool cmLocalSymbianMmpGenerator::writeMacros(std::ostream& mmp, const char* macros)
 {
   if (! macros)
     return false;
 
   std::string values = macros;
-  replaceSemicolonsWithSpaces(values);
+  replaceSemicolons(values, ' ');
   mmp << keyword_with_param("MACRO") << values << std::endl;
   return true;
 }
@@ -343,12 +360,12 @@ void cmLocalSymbianMmpGenerator::writeMakefile(cmTarget& target)
   mk << std::endl << std::endl;
 }
 
-void cmLocalSymbianMmpGenerator::replaceSemicolonsWithSpaces(std::string& s)
+void cmLocalSymbianMmpGenerator::replaceSemicolons(std::string& s, char newSeparator)
 {
   std::string::size_type semicolon_pos = s.find(';');
   while (semicolon_pos != std::string::npos)
     {
-    s[semicolon_pos] = ' ';
+    s[semicolon_pos] = newSeparator;
     semicolon_pos = s.find(';', semicolon_pos);
     }
 }

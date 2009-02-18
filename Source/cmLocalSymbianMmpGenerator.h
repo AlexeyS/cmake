@@ -20,6 +20,7 @@ private:
   void addSources(cmTarget& target, std::ostream& mmp);
   void addLibraries(cmTarget& target, std::ostream& mmp);
   void addDefinitions(cmTarget& target, std::ostream& mmp);
+  void addRawData(cmTarget& target, std::ostream& mmp);
 
   bool writeMacros(std::ostream& mmp, const char* macros);
   void writeGenericResource(const cmSymbianResource& res, std::ostream& mmp);
@@ -30,7 +31,7 @@ private:
 
   void writeMakefile(cmTarget& target);
 
-  static void replaceSemicolonsWithSpaces(std::string& s);
+  static void replaceSemicolons(std::string& s, char newSeparator);
 };
 
 #endif
