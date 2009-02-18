@@ -45,7 +45,9 @@ void cmLocalSymbianMmpGenerator::writeMmp(cmTarget& target)
   addGenericOption(target, "CAPABILITY", mmp);
   mmp << std::endl;
 
-  addDefinitions(mmp);
+  addDefinitions(target, mmp);
+  addRawData(target, mmp);
+
   addResources(target, mmp);
   addIncludes(mmp);
   addSources(target, mmp);
@@ -88,14 +90,16 @@ std::string cmLocalSymbianMmpGenerator::addGenericOption(cmTarget& target,
 {
   std::string varName = target.GetName();
   varName += "_SYMBIAN_" + option;
-  const char* value = Makefile->GetDefinition(varName.c_str());
+  const char* raw_value = Makefile->GetDefinition(varName.c_str());
 
-  if (value)
+  if (raw_value)
     {
+    std::string value = raw_value;
+    replaceSemicolons(value, ' ');
     mmp << keyword_with_param(option) << value << std::endl;
     }
 
-  return value ? value : "";
+  return raw_value ? raw_value : "";
 }
 
 void cmLocalSymbianMmpGenerator::addIncludes(std::ostream& mmp)
@@ -115,33 +119,18 @@ void cmLocalSymbianMmpGenerator::addIncludes(std::ostream& mmp)
     }
 }
 
-void cmLocalSymbianMmpGenerator::addDefinitions(std::ostream& mmp)
+void cmLocalSymbianMmpGenerator::addDefinitions(cmTarget& target, std::ostream& mmp)
 {
-  const char* define_flags = Makefile->GetDefineFlags();
-  const char* pos = define_flags;
-  bool trailing_newline = false;
-    
-  while (pos)
-    {
-    pos = strstr(pos, "-D");
+  bool need_newline = false;
 
-    if (!pos)
-      {
-      break;
-      }
+  if (writeMacros(mmp, Makefile->GetProperty("COMPILE_DEFINITIONS")))
+    need_newline = true;
 
-    pos += 2;
-    const char* whitespace = strchr(pos, ' ');
-    std::string macro(pos, whitespace ? whitespace - pos : strlen(pos));
-    mmp << keyword_with_param("MACRO") << macro << std::endl;
-    pos = whitespace;
-    trailing_newline = true;
-    }
-
-  if (trailing_newline)
-    {
+  if (writeMacros(mmp, target.GetProperty("COMPILE_DEFINITIONS")))
+    need_newline = true;
+  
+  if (need_newline)
     mmp << std::endl;
-    }
 }
 
 void cmLocalSymbianMmpGenerator::addResources(cmTarget& target, std::ostream& mmp)
@@ -214,6 +203,32 @@ void cmLocalSymbianMmpGenerator::addLibraries(cmTarget& target, std::ostream& mm
     {
     mmp << std::endl;
     }
+}
+
+void cmLocalSymbianMmpGenerator::addRawData(cmTarget& target, std::ostream& mmp)
+{
+  std::string varName = target.GetName();
+  varName += "_SYMBIAN_RAW_DATA";
+  const char* raw_value = Makefile->GetDefinition(varName.c_str());
+
+  if (raw_value)
+    {
+    std::string value = raw_value;
+    replaceSemicolons(value, '\n');
+    mmp << value << std::endl;
+    mmp << std::endl;
+    }
+}
+
+bool cmLocalSymbianMmpGenerator::writeMacros(std::ostream& mmp, const char* macros)
+{
+  if (! macros)
+    return false;
+
+  std::string values = macros;
+  replaceSemicolons(values, ' ');
+  mmp << keyword_with_param("MACRO") << values << std::endl;
+  return true;
 }
 
 void cmLocalSymbianMmpGenerator::writeGenericResource(const cmSymbianResource& res,
@@ -343,4 +358,14 @@ void cmLocalSymbianMmpGenerator::writeMakefile(cmTarget& target)
   mk << std::endl;
   mk << "makmake freeze lib cleanlib clean final resource savespace releaseables:";
   mk << std::endl << std::endl;
+}
+
+void cmLocalSymbianMmpGenerator::replaceSemicolons(std::string& s, char newSeparator)
+{
+  std::string::size_type semicolon_pos = s.find(';');
+  while (semicolon_pos != std::string::npos)
+    {
+    s[semicolon_pos] = newSeparator;
+    semicolon_pos = s.find(';', semicolon_pos);
+    }
 }

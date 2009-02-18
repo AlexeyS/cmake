@@ -19,8 +19,10 @@ private:
   void addResources(cmTarget& target, std::ostream& mmp);
   void addSources(cmTarget& target, std::ostream& mmp);
   void addLibraries(cmTarget& target, std::ostream& mmp);
-  void addDefinitions(std::ostream& mmp);
+  void addDefinitions(cmTarget& target, std::ostream& mmp);
+  void addRawData(cmTarget& target, std::ostream& mmp);
 
+  bool writeMacros(std::ostream& mmp, const char* macros);
   void writeGenericResource(const cmSymbianResource& res, std::ostream& mmp);
   void writeBitmap(const cmSymbianResource& res, std::ostream& mmp);
 
@@ -28,6 +30,8 @@ private:
   static std::string targettype_extension(const std::string& targettype);
 
   void writeMakefile(cmTarget& target);
+
+  static void replaceSemicolons(std::string& s, char newSeparator);
 };
 
 #endif
