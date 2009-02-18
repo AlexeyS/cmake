@@ -117,25 +117,14 @@ void cmLocalSymbianMmpGenerator::addIncludes(std::ostream& mmp)
     }
 }
 
-bool cmLocalSymbianMmpGenerator::addMacro(std::ostream& mmp, const char* macros)
-{
-  if (! macros)
-    return false;
-
-  std::string values = macros;
-  replaceSemicolonsWithSpaces(values);
-  mmp << keyword_with_param("MACRO") << values << std::endl;
-  return true;
-}
-
 void cmLocalSymbianMmpGenerator::addDefinitions(cmTarget& target, std::ostream& mmp)
 {
   bool need_newline = false;
 
-  if (addMacro(mmp, Makefile->GetProperty("COMPILE_DEFINITIONS")))
+  if (writeMacros(mmp, Makefile->GetProperty("COMPILE_DEFINITIONS")))
       need_newline = true;
 
-  if (addMacro(mmp, target.GetProperty("COMPILE_DEFINITIONS")))
+  if (writeMacros(mmp, target.GetProperty("COMPILE_DEFINITIONS")))
       need_newline = true;
   
   if (need_newline)
@@ -212,6 +201,17 @@ void cmLocalSymbianMmpGenerator::addLibraries(cmTarget& target, std::ostream& mm
     {
     mmp << std::endl;
     }
+}
+
+bool cmLocalSymbianMmpGenerator::writeMacros(std::ostream& mmp, const char* macros)
+{
+  if (! macros)
+    return false;
+
+  std::string values = macros;
+  replaceSemicolonsWithSpaces(values);
+  mmp << keyword_with_param("MACRO") << values << std::endl;
+  return true;
 }
 
 void cmLocalSymbianMmpGenerator::writeGenericResource(const cmSymbianResource& res,

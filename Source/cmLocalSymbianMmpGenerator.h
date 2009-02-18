@@ -19,9 +19,9 @@ private:
   void addResources(cmTarget& target, std::ostream& mmp);
   void addSources(cmTarget& target, std::ostream& mmp);
   void addLibraries(cmTarget& target, std::ostream& mmp);
-  bool addMacro(std::ostream& mmp, const char* macros);
   void addDefinitions(cmTarget& target, std::ostream& mmp);
 
+  bool writeMacros(std::ostream& mmp, const char* macros);
   void writeGenericResource(const cmSymbianResource& res, std::ostream& mmp);
   void writeBitmap(const cmSymbianResource& res, std::ostream& mmp);
 
