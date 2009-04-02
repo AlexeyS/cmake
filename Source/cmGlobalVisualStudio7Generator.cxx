@@ -283,7 +283,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
       const cmCustomCommandLines& cmds = cc.GetCommandLines();
       std::string project = cmds[0][0];
       this->WriteProjectConfigurations(fout, project.c_str(),
-                                       true);
+                                       true, target->GetProperty("MSVS_PLATFORM_MAPPING"));
       }
     else
       {
@@ -330,7 +330,9 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
       std::string project = cmds[0][0];
       std::string location = cmds[0][1];
       this->WriteExternalProject(fout, project.c_str(), 
-                                 location.c_str(), cc.GetDepends());
+                                 location.c_str(),
+                                 target->GetProperty("MSVS_PROJECT_TYPE"),
+                                 cc.GetDepends());
       }
     else
       {
@@ -573,18 +575,21 @@ cmGlobalVisualStudio7Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator
 ::WriteProjectConfigurations(std::ostream& fout, const char* name,
-                             bool partOfDefaultBuild)
+                             bool partOfDefaultBuild,
+                             const char* platformMapping)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
     fout << "\t\t{" << guid << "}." << *i
-         << ".ActiveCfg = " << *i << "|Win32\n";
+         << ".ActiveCfg = " << *i << "|"
+         << (platformMapping ? platformMapping : "Win32") << "\n";
     if(partOfDefaultBuild)
       {
       fout << "\t\t{" << guid << "}." << *i
-           << ".Build.0 = " << *i << "|Win32\n";
+           << ".Build.0 = " << *i << "|"
+           << (platformMapping ? platformMapping : "Win32") << "\n";
       }
     }
 }
@@ -594,14 +599,17 @@ void cmGlobalVisualStudio7Generator
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to 
 // the libraries it uses are also done here
-void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout, 
+void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout,
                                const char* name,
                                const char* location,
+                               const char* typeGUID,
                                const std::vector<std::string>&)
 { 
   std::cout << "WriteExternalProject vs7\n";
   std::string d = cmSystemTools::ConvertToOutputPath(location);
-  fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
+  fout << "Project(\""
+       << (typeGUID ? typeGUID : "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}")
+       << "\") = \"" 
        << name << "\", \""
        << this->ConvertToSolutionPath(location) << "\", \"{"
        << this->GetGUID(name)

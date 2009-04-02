@@ -109,7 +109,8 @@ protected:
                            const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectConfigurations(std::ostream& fout,
                                           const char* name,
-                                          bool partOfDefaultBuild);
+                                          bool partOfDefaultBuild,
+                                          const char* platformMapping = NULL);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void AddPlatformDefinitions(cmMakefile* mf);
@@ -136,6 +137,7 @@ protected:
   virtual void WriteExternalProject(std::ostream& fout, 
                                     const char* name, 
                                     const char* path,
+                                    const char* typeGUID,
                                     const std::vector<std::string>&
                                     dependencies);
 

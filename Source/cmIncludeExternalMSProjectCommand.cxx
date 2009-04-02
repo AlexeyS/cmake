@@ -28,16 +28,36 @@ bool cmIncludeExternalMSProjectCommand
   }
 // only compile this for win32 to avoid coverage errors
 #ifdef _WIN32
+  std::string customType;
+  std::string platformMapping;
+
   if(this->Makefile->GetDefinition("WIN32"))
     {
     std::string location = args[1];
+    bool gotTypeKeyword = false;
+    bool gotPlatformKeyword = false;
     
     std::vector<std::string> depends;
     if (args.size() > 2)
       {
       for (unsigned int i=2; i<args.size(); ++i) 
         {
-        depends.push_back(args[i]); 
+        if (gotTypeKeyword)
+          {
+          customType = args[i];
+          gotTypeKeyword = false;
+          }
+        else if (gotPlatformKeyword)
+          {
+          platformMapping = args[i];
+          gotPlatformKeyword = false;
+          }
+        else if (args[i] == "TYPE")
+          gotTypeKeyword = true;
+        else if (args[i] == "PLATFORM")
+          gotPlatformKeyword = true;
+        else
+          depends.push_back(args[i]); 
         }
       }
 
@@ -53,6 +73,11 @@ bool cmIncludeExternalMSProjectCommand
     cmTarget* target=this->Makefile->AddNewTarget(cmTarget::UTILITY, 
                                                   utility_name.c_str());
     target->SetProperty("EXCLUDE_FROM_ALL","FALSE");
+    if (!customType.empty())
+      target->SetProperty("MSVS_PROJECT_TYPE",customType.c_str());
+    if (!platformMapping.empty())
+      target->SetProperty("MSVS_PLATFORM_MAPPING",platformMapping.c_str());
+
     std::vector<std::string> no_outputs;
     cmCustomCommandLines commandLines;
     cmCustomCommandLine commandLine;
