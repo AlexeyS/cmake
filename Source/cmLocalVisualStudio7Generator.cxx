@@ -880,6 +880,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     }
   Options linkOptions(this, this->Version, Options::Linker);
   linkOptions.Parse(extraLinkOptions.c_str());
+  linkOptions.AddFlag("LinkLibraryDependencies", "false");
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
