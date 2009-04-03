@@ -29,6 +29,7 @@ bool cmIncludeExternalMSProjectCommand
 // only compile this for win32 to avoid coverage errors
 #ifdef _WIN32
   std::string customType;
+  std::string customGuid;
   std::string platformMapping;
 
   if(this->Makefile->GetDefinition("WIN32"))
@@ -36,6 +37,7 @@ bool cmIncludeExternalMSProjectCommand
     std::string location = args[1];
     bool gotTypeKeyword = false;
     bool gotPlatformKeyword = false;
+    bool gotGuidKeyword = false;
     
     std::vector<std::string> depends;
     if (args.size() > 2)
@@ -47,6 +49,11 @@ bool cmIncludeExternalMSProjectCommand
           customType = args[i];
           gotTypeKeyword = false;
           }
+        else if (gotGuidKeyword)
+          {
+          customGuid = args[i];
+          gotGuidKeyword = false;
+          }
         else if (gotPlatformKeyword)
           {
           platformMapping = args[i];
@@ -54,6 +61,8 @@ bool cmIncludeExternalMSProjectCommand
           }
         else if (args[i] == "TYPE")
           gotTypeKeyword = true;
+        else if (args[i] == "GUID")
+          gotGuidKeyword = true;
         else if (args[i] == "PLATFORM")
           gotPlatformKeyword = true;
         else
@@ -68,6 +77,15 @@ bool cmIncludeExternalMSProjectCommand
     utility_name += args[0];
     std::string path = args[1];
     cmSystemTools::ConvertToUnixSlashes(path);
+
+    if (!customGuid.empty())
+      {
+      std::string guidStoreName = args[0] + "_GUID_CMAKE";
+      this->Makefile->GetCMakeInstance()->AddCacheEntry(guidStoreName.c_str(),
+                                                        customGuid.c_str(),
+                                                        "Stored GUID",
+                                                        cmCacheManager::INTERNAL);
+      }
 
     // Create a target instance for this utility.
     cmTarget* target=this->Makefile->AddNewTarget(cmTarget::UTILITY, 

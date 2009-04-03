@@ -607,9 +607,9 @@ void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout,
 { 
   std::cout << "WriteExternalProject vs7\n";
   std::string d = cmSystemTools::ConvertToOutputPath(location);
-  fout << "Project(\""
-       << (typeGUID ? typeGUID : "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}")
-       << "\") = \"" 
+  fout << "Project(\"{"
+       << (typeGUID ? typeGUID : "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942")
+       << "}\") = \"" 
        << name << "\", \""
        << this->ConvertToSolutionPath(location) << "\", \"{"
        << this->GetGUID(name)

@@ -251,9 +251,9 @@ void cmGlobalVisualStudio71Generator
                        const std::vector<std::string>& depends)
 { 
   std::cout << "WriteExternalProject vs71\n";
-  fout << "Project(\""
-       << (typeGUID ? typeGUID : "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}")
-       << "\") = \"" 
+  fout << "Project(\"{"
+       << (typeGUID ? typeGUID : "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942")
+       << "}\") = \"" 
        << name << "\", \""
        << this->ConvertToSolutionPath(location) << "\", \"{"
        << this->GetGUID(name)
