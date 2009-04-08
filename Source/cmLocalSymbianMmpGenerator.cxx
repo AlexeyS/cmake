@@ -53,7 +53,70 @@ void cmLocalSymbianMmpGenerator::writeMmp(cmTarget& target)
   addSources(target, mmp);
 
   if (target.GetType() != cmTarget::STATIC_LIBRARY)
-      addLibraries(target, mmp);
+    {
+    addLibraries(target, mmp);
+    }
+
+  size_t customCommandsCount = target.GetPreBuildCommands().size() +
+                               target.GetPreLinkCommands().size() +
+                               target.GetPostBuildCommands().size();
+
+  if (customCommandsCount > 0)
+    {
+    writeHelperMakefile(target);
+    }
+}
+
+void cmLocalSymbianMmpGenerator::writeHelperMakefile(cmTarget& target)
+{
+  std::string filename = Makefile->GetStartOutputDirectory();
+  filename += "/";
+  filename += target.GetName();
+  filename += ".mk";
+  std::ofstream mk(filename.c_str());
+  
+  mk << "bld:" << std::endl;
+  for (size_t i = 0; i < target.GetPreBuildCommands().size(); ++i)
+    {
+    writeCustomCommand(target.GetPreBuildCommands()[i], mk);
+    }
+
+  for (size_t i = 0; i < target.GetPreLinkCommands().size(); ++i)
+    {
+    writeCustomCommand(target.GetPreBuildCommands()[i], mk);
+    }
+  mk << std::endl;
+
+  mk << "final:" << std::endl;
+  for (size_t i = 0; i < target.GetPreLinkCommands().size(); ++i)
+    {
+    writeCustomCommand(target.GetPreBuildCommands()[i], mk);
+    }
+  mk << std::endl;
+
+  mk << "makmake freeze lib cleanlib clean resource savespace releaseables:" << std::endl;
+}
+
+void cmLocalSymbianMmpGenerator::writeCustomCommand(cmCustomCommand& cmd, std::ostream& mk)
+{
+  if (cmd.GetComment() != NULL)
+    {
+    mk << "\t@echo " << cmd.GetComment();
+    }
+
+  const cmCustomCommandLines& cmdlines = cmd.GetCommandLines();
+  cmCustomCommandLines::const_iterator i;
+  for (i = cmdlines.begin(); i != cmdlines.end(); ++i)
+    {
+    const cmCustomCommandLine line = *i;
+    cmCustomCommandLine::const_iterator j;
+    mk << "\t";
+    for (j = line.begin(); j != line.end(); ++j)
+      {
+      mk << (j != line.begin() ? " " : "") << *j;
+      }
+    mk << std::endl;
+    }
 }
 
 void cmLocalSymbianMmpGenerator::writeTargetType(cmTarget& target, std::ostream& mmp)

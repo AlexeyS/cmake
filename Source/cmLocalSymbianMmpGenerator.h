@@ -11,6 +11,7 @@ public:
 
 private:
   void writeMmp(cmTarget& target);
+  void writeHelperMakefile(cmTarget& target);
   void writeTargetType(cmTarget& target, std::ostream& mmp);
 
   std::string addGenericOption(cmTarget& target, const std::string& option,
@@ -25,6 +26,8 @@ private:
   bool writeMacros(std::ostream& mmp, const char* macros);
   void writeGenericResource(const cmSymbianResource& res, std::ostream& mmp);
   void writeBitmap(const cmSymbianResource& res, std::ostream& mmp);
+
+  void writeCustomCommand(cmCustomCommand& cmd, std::ostream& mk);
 
   static std::string keyword_with_param(const std::string& option);
   static std::string targettype_extension(const std::string& targettype);

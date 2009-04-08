@@ -45,6 +45,20 @@ void cmGlobalSymbianMmpGenerator::Generate()
       prj += (prj.length() > 0 ? "/" : "");
       prj += t->first + (t->second.GetType() == cmTarget::UTILITY ? ".mk" : ".mmp");
       bld_inf << LocalGenerators[i]->ConvertToRelativePath(basedir_components, prj.c_str()) << std::endl;
+
+      if (t->second.GetType() != cmTarget::UTILITY)
+        {
+        size_t customStepsCount = t->second.GetPreBuildCommands().size() +
+                                  t->second.GetPreLinkCommands().size() +
+                                  t->second.GetPostBuildCommands().size();
+        if (customStepsCount > 0)
+          {
+              std::string helperMakefile = t->first;
+              helperMakefile += ".mk";
+              bld_inf << "gnumakefile ";
+              bld_inf << LocalGenerators[i]->ConvertToRelativePath(basedir_components, helperMakefile.c_str()) << std::endl;
+          }
+        }
       }
     }
 }
