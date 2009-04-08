@@ -20,6 +20,7 @@
 #include "cmCustomCommand.h"
 #include "cmPropertyMap.h"
 #include "cmPolicies.h"
+#include "cmSymbianResource.h"
 
 class cmake;
 class cmMakefile;
@@ -175,7 +176,7 @@ public:
   /**
    * Get the list of the source files used by this target
    */
-  enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
+  enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED, IMPORT};
 
   //* how we identify a library, by name and type
   typedef std::pair<cmStdString, LinkLibraryType> LibraryID;
@@ -236,6 +237,15 @@ public:
   void AddUtility(const char* u) { this->Utilities.insert(u);}
   ///! Get the utilities used by this target
   std::set<cmStdString>const& GetUtilities() const { return this->Utilities; }
+
+  /**
+   * Add Symbian resource declaration to the target
+   */
+  void AddSymbianResource(const cmSymbianResource& res)
+    {this->SymbianResources.push_back(res);}
+  ///! Get the symbian resources used by this target
+  const std::vector<cmSymbianResource>& GetSymbianResources()
+    {return this->SymbianResources;}
 
   void AnalyzeLibDependencies( const cmMakefile& mf );
 
@@ -566,6 +576,9 @@ private:
   // Internal representation details.
   friend class cmTargetInternals;
   cmTargetInternalPointer Internal;
+
+  // Symbian resources associated with the target
+  std::vector<cmSymbianResource> SymbianResources;
 
   void ConstructSourceFileFlags();
 };

@@ -18,6 +18,11 @@
 # If not already set before, it also sets
 #   _CMAKE_TOOLCHAIN_PREFIX
 
+IF(SYMBIAN)
+  INCLUDE(CMakeForceCompiler)
+  CMAKE_FORCE_C_COMPILER(sdk "SDK Compiler")
+ENDIF(SYMBIAN)
+
 IF(NOT CMAKE_C_COMPILER)
   SET(CMAKE_CXX_COMPILER_INIT NOTFOUND)
 

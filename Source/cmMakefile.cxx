@@ -1435,6 +1435,10 @@ void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
                                  bool excludeFromAll, bool preorder,
                                  bool immediate)
 {
+  // reuse targets
+  if (this->LocalGenerator->GetGlobalGenerator()->HaveSubdirectory(srcPath))
+      return;
+
   std::vector<cmLocalGenerator *>& children =
     this->LocalGenerator->GetChildren();
   // has this directory already been added? If so error

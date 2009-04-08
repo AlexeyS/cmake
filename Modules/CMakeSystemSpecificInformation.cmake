@@ -12,6 +12,7 @@ SET(APPLE  )
 SET(UNIX   )
 SET(CYGWIN )
 SET(WIN32  )
+SET(SYMBIAN  )
 
 
 # include Generic system information

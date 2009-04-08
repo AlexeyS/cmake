@@ -26,6 +26,8 @@
 #include "cmAddExecutableCommand.cxx"
 #include "cmAddLibraryCommand.cxx"
 #include "cmAddSubDirectoryCommand.cxx"
+#include "cmAddSymbianBitmapCommand.cxx"
+#include "cmAddSymbianResourceCommand.cxx"
 #include "cmAddTestCommand.cxx"
 #include "cmBreakCommand.cxx"
 #include "cmBuildCommand.cxx"
@@ -104,6 +106,8 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmAddExecutableCommand);
   commands.push_back(new cmAddLibraryCommand);
   commands.push_back(new cmAddSubDirectoryCommand);
+  commands.push_back(new cmAddSymbianBitmapCommand);
+  commands.push_back(new cmAddSymbianResourceCommand);
   commands.push_back(new cmAddTestCommand);
   commands.push_back(new cmBreakCommand);
   commands.push_back(new cmBuildCommand);

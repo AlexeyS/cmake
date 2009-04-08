@@ -282,6 +282,12 @@ public:
   void GenerateFrameworkInfoPList(cmTarget* target,
                                   const char* targetName,
                                   const char* fname);
+
+  /**
+   * Check whether a subdirectory is already added
+   */
+  bool HaveSubdirectory(const std::string& path);
+
 protected:
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(const cmCustomCommand& cc,

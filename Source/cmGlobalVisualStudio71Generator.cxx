@@ -247,10 +247,13 @@ void cmGlobalVisualStudio71Generator
 ::WriteExternalProject(std::ostream& fout, 
                        const char* name,
                        const char* location,
+                       const char* typeGUID,
                        const std::vector<std::string>& depends)
 { 
   std::cout << "WriteExternalProject vs71\n";
-  fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
+  fout << "Project(\"{"
+       << (typeGUID ? typeGUID : "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942")
+       << "}\") = \"" 
        << name << "\", \""
        << this->ConvertToSolutionPath(location) << "\", \"{"
        << this->GetGUID(name)
@@ -286,18 +289,21 @@ void cmGlobalVisualStudio71Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
 ::WriteProjectConfigurations(std::ostream& fout, const char* name,
-                             bool partOfDefaultBuild)
+                             bool partOfDefaultBuild,
+                             const char* platformMapping)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
     fout << "\t\t{" << guid << "}." << *i 
-         << ".ActiveCfg = " << *i << "|Win32\n";
+         << ".ActiveCfg = " << *i << "|"
+         << (platformMapping ? platformMapping : "Win32") << "\n";
     if(partOfDefaultBuild)
       {
       fout << "\t\t{" << guid << "}." << *i
-           << ".Build.0 = " << *i << "|Win32\n";
+           << ".Build.0 = " << *i << "|"
+           << (platformMapping ? platformMapping : "Win32") << "\n";
       }
     }
 }
