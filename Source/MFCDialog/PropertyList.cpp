@@ -248,7 +248,7 @@ void CPropertyList::OnSelchange()
       { 
       rect.bottom += 100;
       m_cmbBox.Create(CBS_DROPDOWNLIST 
-                      | CBS_NOINTEGRALHEIGHT | WS_VISIBLE 
+                      | WS_VISIBLE | WS_VSCROLL
                       | WS_CHILD | WS_BORDER,
                       rect,this,IDC_PROPCMBBOX);
       m_cmbBox.SetFont(&m_SSerif8Font);

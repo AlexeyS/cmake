@@ -67,7 +67,8 @@
 #    include "cmGlobalVisualStudio9Generator.h"
 #    include "cmGlobalVisualStudio9Win64Generator.h"
 #    include "cmGlobalVisualStudio8Win64Generator.h"
-#    include "cmGlobalVisualStudio8WMGenerator.h"
+#    include "cmGlobalVisualStudio9WCEGenerator.h"
+#    include "cmGlobalVisualStudio8WCEGenerator.h"
 #    include "cmGlobalBorlandMakefileGenerator.h"
 #    include "cmGlobalNMakeMakefileGenerator.h"
 #    include "cmGlobalWatcomWMakeGenerator.h"
@@ -2419,8 +2420,10 @@ void cmake::AddDefaultGenerators()
     &cmGlobalVisualStudio9Win64Generator::New;
   this->Generators[cmGlobalVisualStudio8Win64Generator::GetActualName()] =
     &cmGlobalVisualStudio8Win64Generator::New;
-  this->Generators[cmGlobalVisualStudio8WMGenerator::GetActualName()] =
-      &cmGlobalVisualStudio8WMGenerator::New;
+  this->Generators[cmGlobalVisualStudio8WCEGenerator::GetActualName()] =
+      &cmGlobalVisualStudio8WCEGenerator::New;
+  this->Generators[cmGlobalVisualStudio9WCEGenerator::GetActualName()] =
+      &cmGlobalVisualStudio9WCEGenerator::New;
   this->Generators[cmGlobalBorlandMakefileGenerator::GetActualName()] =
     &cmGlobalBorlandMakefileGenerator::New;
   this->Generators[cmGlobalNMakeMakefileGenerator::GetActualName()] =

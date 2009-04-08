@@ -268,10 +268,12 @@ IF (WIN32)
       cmGlobalVisualStudio9Generator.h
       cmGlobalVisualStudio8Win64Generator.cxx
       cmGlobalVisualStudio8Win64Generator.h
-      cmGlobalVisualStudio8WMGenerator.cxx
-      cmGlobalVisualStudio8WMGenerator.h
+      cmGlobalVisualStudio8WCEGenerator.cxx
+      cmGlobalVisualStudio8WCEGenerator.h
       cmGlobalVisualStudio9Win64Generator.cxx
       cmGlobalVisualStudio9Win64Generator.h
+      cmGlobalVisualStudio9WCEGenerator.cxx
+      cmGlobalVisualStudio9WCEGenerator.h
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
       cmGlobalWatcomWMakeGenerator.cxx

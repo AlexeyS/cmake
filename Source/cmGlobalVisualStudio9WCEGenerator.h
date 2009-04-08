@@ -1,26 +1,26 @@
-#ifndef cmGlobalVisualStudio8WMGenerator_h
-#define cmGlobalVisualStudio8WMGenerator_h
+#ifndef cmGlobalVisualStudio9WCEGenerator_h
+#define cmGlobalVisualStudio9WCEGenerator_h
 
-#include "cmGlobalVisualStudio8Generator.h"
+#include "cmGlobalVisualStudio9Generator.h"
 
 
-/** \class cmGlobalVisualStudio8WMGenerator
+/** \class cmGlobalVisualStudio9WCEGenerator
  * \brief Write a Visual Studio solution for Windows Mobile platform.
  *
- * cmGlobalVisualStudio8WMGenerator manages MSVS build process for a tree
+ * cmGlobalVisualStudio9WCEGenerator manages MSVS build process for a tree
  */
-class cmGlobalVisualStudio8WMGenerator : 
-  public cmGlobalVisualStudio8Generator
+class cmGlobalVisualStudio9WCEGenerator : 
+  public cmGlobalVisualStudio9Generator
 {
 public:
-  cmGlobalVisualStudio8WMGenerator();
+  cmGlobalVisualStudio9WCEGenerator();
   static cmGlobalGenerator* New() { 
-    return new cmGlobalVisualStudio8WMGenerator; }
+    return new cmGlobalVisualStudio9WCEGenerator; }
   
   ///! Get the name for the generator.
   virtual const char* GetName() const {
-    return cmGlobalVisualStudio8WMGenerator::GetActualName();}
-  static const char* GetActualName() {return "Visual Studio 8 2005 for Windows Mobile";}
+    return cmGlobalVisualStudio9WCEGenerator::GetActualName();}
+  static const char* GetActualName() {return "Visual Studio 9 2008 for Windows CE";}
 
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
@@ -42,7 +42,7 @@ private:
     std::string TargetMachine;
     };
 
-  class cmWMConfigParser;
+  class cmWCEConfigParser;
   void getInstalledSDKs();
 
 private:

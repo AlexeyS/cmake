@@ -1,12 +1,12 @@
 
 #include "windows.h"
-#include "cmGlobalVisualStudio8WMGenerator.h"
+#include "cmGlobalVisualStudio8WCEGenerator.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
 #include "cmake.h"
 #include "cmXMLParser.h"
 
-cmGlobalVisualStudio8WMGenerator::cmGlobalVisualStudio8WMGenerator()
+cmGlobalVisualStudio8WCEGenerator::cmGlobalVisualStudio8WCEGenerator()
 {
   // Get map of installed SDKs in system
   // Make default platform for the first one in map
@@ -18,21 +18,21 @@ cmGlobalVisualStudio8WMGenerator::cmGlobalVisualStudio8WMGenerator()
 }
 
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalVisualStudio8WMGenerator::CreateLocalGenerator()
+cmLocalGenerator *cmGlobalVisualStudio8WCEGenerator::CreateLocalGenerator()
 {
-  const char* platform = GetCMakeInstance()->GetCacheDefinition("CMAKE_WINDOWS_MOBILE_PLATFORM");
+  const char* platform = GetCMakeInstance()->GetCacheDefinition("CMAKE_WINDOWS_CE_PLATFORM");
   if( platform )
     this->PlatformName = platform;
   else
     {
-    GetCMakeInstance()->AddCacheEntry("CMAKE_WINDOWS_MOBILE_PLATFORM",
+    GetCMakeInstance()->AddCacheEntry("CMAKE_WINDOWS_CE_PLATFORM",
                                       this->PlatformName.c_str(),
                                       "WinCE platform name",
                                       cmCacheManager::STRING);
     }
 
   cmCacheManager::CacheIterator it = GetCMakeInstance()->GetCacheManager()->
-                                     GetCacheIterator("CMAKE_WINDOWS_MOBILE_PLATFORM");
+                                     GetCacheIterator("CMAKE_WINDOWS_CE_PLATFORM");
   if (!it.PropertyExists("VALID_VALUES"))
     {
     std::string validPlatformValues;
@@ -58,7 +58,7 @@ cmLocalGenerator *cmGlobalVisualStudio8WMGenerator::CreateLocalGenerator()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio8WMGenerator
+void cmGlobalVisualStudio8WCEGenerator
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.Name = this->GetName();
@@ -66,14 +66,14 @@ void cmGlobalVisualStudio8WMGenerator
   entry.Full = "";
 }
 
-void cmGlobalVisualStudio8WMGenerator
+void cmGlobalVisualStudio8WCEGenerator
 ::EnableLanguage(std::vector<std::string>const &  lang, 
                  cmMakefile *mf, bool optional)
 {
   InstalledSDKsMap::const_iterator it = this->InstalledSDKs.find(this->PlatformName);
   if(it == this->InstalledSDKs.end())
     {
-    cmSystemTools::Error("CMAKE_WINDOWS_MOBILE_PLATFORM must be a valid CE platform!");
+    cmSystemTools::Error("CMAKE_WINDOWS_CE_PLATFORM must be a valid CE platform!");
     cmSystemTools::SetFatalErrorOccured();
     return;
     }
@@ -98,10 +98,10 @@ void cmGlobalVisualStudio8WMGenerator
 
 // This class is used to parse XML with configuration
 // of installed SDKs in system
-class cmGlobalVisualStudio8WMGenerator::cmWMConfigParser : public cmXMLParser
+class cmGlobalVisualStudio8WCEGenerator::cmWCEConfigParser : public cmXMLParser
 {
 public:
-  cmWMConfigParser(InstalledSDKsMap& sdks)
+  cmWCEConfigParser(InstalledSDKsMap& sdks)
       : SDKs(sdks)
     {
     }
@@ -173,8 +173,8 @@ private:
   InstalledSDKsMap& SDKs;
 };
 
-void cmGlobalVisualStudio8WMGenerator::
-getInstalledSDKs()
+void cmGlobalVisualStudio8WCEGenerator
+::getInstalledSDKs()
 {
   // get Visual Studio 2005 install directory
   static const char* pathKey =
@@ -193,6 +193,6 @@ getInstalledSDKs()
     vsInstallPath + std::string("/VC/vcpackages/WCE.VCPlatform.config");
 
   // parse XML containing all information that we need
-  cmWMConfigParser parser(InstalledSDKs);
+  cmWCEConfigParser parser(InstalledSDKs);
   parser.ParseFile(configFilename.c_str());
 }
