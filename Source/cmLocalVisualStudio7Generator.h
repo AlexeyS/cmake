@@ -76,6 +76,9 @@ private:
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
                                       const char* configName);
   void FixGlobalTargets();
+  void ApplyCrtLinkageType(Options& options,
+                           const char* crtLinkage,
+                           const char* configName);
   void WriteProjectFiles();
   void WriteStampFiles();
   void WriteVCProjHeader(std::ostream& fout, const char *libName,

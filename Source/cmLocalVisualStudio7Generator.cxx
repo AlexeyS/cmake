@@ -536,6 +536,38 @@ private:
                       bool& flag_handled);
 };
 
+void cmLocalVisualStudio7Generator
+::ApplyCrtLinkageType(Options& options,
+                      const char* crtLinkage,
+                      const char* configName)
+{
+  if (crtLinkage)
+    {
+    if (stricmp(crtLinkage, "static") == 0)
+      {
+      if (strcmp(configName, "Debug") == 0)
+       {
+        options.AddFlag("RuntimeLibrary", "1"); // MTd
+       }
+      else
+       {
+        options.AddFlag("RuntimeLibrary", "0"); // MT
+       }
+      }
+    else
+      {
+      if (strcmp(configName, "Debug") == 0)
+        {
+        options.AddFlag("RuntimeLibrary", "3"); // MDd
+        }
+      else
+        {
+        options.AddFlag("RuntimeLibrary", "2"); // MD
+        }
+      }
+    }
+}
+
 void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
                                                        const char* configName,
                                                        const char *libName,
@@ -650,6 +682,20 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   configDefine += configName;
   configDefine += "\"";
   targetOptions.AddDefine(configDefine);
+
+  if (target.GetType() != cmTarget::UTILITY &&
+      target.GetType() != cmTarget::GLOBAL_TARGET)
+    {
+    ApplyCrtLinkageType(targetOptions,
+                        target.GetProperty("RUNTIME_LIBRARY_LINKAGE"),
+                        configName);
+
+    // global policy
+    const char* varName = "FORCE_RUNTIME_LIBRARY_LINKAGE";
+    ApplyCrtLinkageType(targetOptions,
+                        this->Makefile->GetDefinition(varName),
+                        configName);
+    }
 
   // Add the export symbol definition for shared library objects.
   if(const char* exportMacro = target.GetExportMacro())
