@@ -155,18 +155,17 @@ std::string cmLocalSymbianMmpGenerator
                    const std::string& option,
                    std::ostream& mmp)
 {
-  std::string varName = target.GetName();
-  varName += "_SYMBIAN_" + option;
-  const char* raw_value = Makefile->GetDefinition(varName.c_str());
+  std::string propName = "SYMBIAN_" + option;
+  const char* rawValue = target.GetProperty(propName.c_str());
 
-  if (raw_value)
+  if (rawValue)
     {
-    std::string value = raw_value;
+    std::string value = rawValue;
     this->ReplaceSemicolons(value, ' ');
     mmp << KeywordWithParam(option) << value << std::endl;
     }
 
-  return raw_value ? raw_value : "";
+  return rawValue ? rawValue : "";
 }
 
 void cmLocalSymbianMmpGenerator::AddIncludes(std::ostream& mmp)
