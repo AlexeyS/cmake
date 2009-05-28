@@ -50,7 +50,7 @@ cmLocalGenerator *cmGlobalVisualStudio9WCEGenerator::CreateLocalGenerator()
     }
 
   cmLocalVisualStudio7Generator *lg = new cmLocalVisualStudio7Generator;
-  lg->SetVersion8();
+  lg->SetVersion9();
   lg->SetPlatformName(this->PlatformName.c_str());
   lg->SetExtraFlagTable(this->GetExtraFlagTableVS8());
   lg->SetGlobalGenerator(this);
