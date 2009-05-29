@@ -109,6 +109,7 @@ protected:
                            const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectConfigurations(std::ostream& fout,
                                           const char* name,
+                                          cmTarget &t,
                                           bool partOfDefaultBuild);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);

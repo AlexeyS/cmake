@@ -283,7 +283,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
       const cmCustomCommandLines& cmds = cc.GetCommandLines();
       std::string project = cmds[0][0];
       this->WriteProjectConfigurations(fout, project.c_str(),
-                                       true);
+                                       *target, true);
       }
     else
       {
@@ -294,7 +294,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
       if (vcprojName)
         {
         this->WriteProjectConfigurations(fout, vcprojName,
-                                         partOfDefaultBuild);
+                                         *target, partOfDefaultBuild);
         }
       }
     }
@@ -573,6 +573,7 @@ cmGlobalVisualStudio7Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator
 ::WriteProjectConfigurations(std::ostream& fout, const char* name,
+                             cmTarget& target,
                              bool partOfDefaultBuild)
 {
   std::string guid = this->GetGUID(name);

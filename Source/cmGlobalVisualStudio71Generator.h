@@ -68,6 +68,7 @@ protected:
                            const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectConfigurations(std::ostream& fout,
                                           const char* name,
+                                          cmTarget& t,
                                           bool partOfDefaultBuild);
   virtual void WriteExternalProject(std::ostream& fout,
                                     const char* name,

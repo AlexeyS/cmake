@@ -11,6 +11,7 @@ cmGlobalVisualStudio9WCEGenerator::cmGlobalVisualStudio9WCEGenerator()
   // Get map of installed SDKs in system
   // Make default platform for the first one in map
   this->getInstalledSDKs();
+  this->EnableDeployment(true);
   if(!this->InstalledSDKs.empty())
     {
       this->PlatformName = this->InstalledSDKs.begin()->first.c_str();

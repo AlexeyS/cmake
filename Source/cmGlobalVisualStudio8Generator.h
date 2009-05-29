@@ -75,7 +75,12 @@ protected:
   virtual void WriteSolutionConfigurations(std::ostream& fout);
   virtual void WriteProjectConfigurations(std::ostream& fout,
                                           const char* name,
+                                          cmTarget& t,
                                           bool partOfDefaultBuild);
-  std::string PlatformName; // Win32 or x64 
+
+  void EnableDeployment(bool enable) { this->DeploymentEnabled = enable; }
+
+  std::string PlatformName; // Win32 or x64
+  bool DeploymentEnabled;
 };
 #endif
