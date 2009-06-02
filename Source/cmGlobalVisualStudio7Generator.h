@@ -109,8 +109,13 @@ protected:
                            const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectConfigurations(std::ostream& fout,
                                           const char* name,
+<<<<<<< HEAD:Source/cmGlobalVisualStudio7Generator.h
                                           bool partOfDefaultBuild,
                                           const char* platformMapping = NULL);
+=======
+                                          cmTarget &t,
+                                          bool partOfDefaultBuild);
+>>>>>>> b991869e4e53e34f9a0aa5e6c4dc40eb4e3cb435:Source/cmGlobalVisualStudio7Generator.h
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void AddPlatformDefinitions(cmMakefile* mf);

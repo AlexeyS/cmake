@@ -283,7 +283,11 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
       const cmCustomCommandLines& cmds = cc.GetCommandLines();
       std::string project = cmds[0][0];
       this->WriteProjectConfigurations(fout, project.c_str(),
+<<<<<<< HEAD:Source/cmGlobalVisualStudio7Generator.cxx
                                        true, target->GetProperty("MSVS_PLATFORM_MAPPING"));
+=======
+                                       *target, true);
+>>>>>>> b991869e4e53e34f9a0aa5e6c4dc40eb4e3cb435:Source/cmGlobalVisualStudio7Generator.cxx
       }
     else
       {
@@ -294,7 +298,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
       if (vcprojName)
         {
         this->WriteProjectConfigurations(fout, vcprojName,
-                                         partOfDefaultBuild);
+                                         *target, partOfDefaultBuild);
         }
       }
     }
@@ -575,8 +579,13 @@ cmGlobalVisualStudio7Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator
 ::WriteProjectConfigurations(std::ostream& fout, const char* name,
+<<<<<<< HEAD:Source/cmGlobalVisualStudio7Generator.cxx
                              bool partOfDefaultBuild,
                              const char* platformMapping)
+=======
+                             cmTarget& target,
+                             bool partOfDefaultBuild)
+>>>>>>> b991869e4e53e34f9a0aa5e6c4dc40eb4e3cb435:Source/cmGlobalVisualStudio7Generator.cxx
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();

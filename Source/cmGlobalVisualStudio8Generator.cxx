@@ -27,6 +27,7 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator()
   this->FindMakeProgramFile = "CMakeVS8FindMake.cmake";
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->PlatformName = "Win32";
+  this->DeploymentEnabled = false;
 }
 
 //----------------------------------------------------------------------------
@@ -303,7 +304,7 @@ cmGlobalVisualStudio8Generator
 void
 cmGlobalVisualStudio8Generator
 ::WriteProjectConfigurations(std::ostream& fout, const char* name,
-                             bool partOfDefaultBuild,
+                             cmTarget& t, bool partOfDefaultBuild,
                              const char* platformMapping)
 {
   std::string guid = this->GetGUID(name);
@@ -318,6 +319,14 @@ cmGlobalVisualStudio8Generator
       fout << "\t\t{" << guid << "}." << *i
            << "|" << this->PlatformName << ".Build.0 = "
            << *i << "|" << (platformMapping ? platformMapping : this->PlatformName) << "\n";
+      }
+    bool needsDeploy = (t.GetType() == cmTarget::EXECUTABLE ||
+                        t.GetType() == cmTarget::SHARED_LIBRARY);
+    if(this->DeploymentEnabled && needsDeploy)
+      {
+      fout << "\t\t{" << guid << "}." << *i
+           << "|" << this->PlatformName << ".Deploy.0 = "
+           << *i << "|" << this->PlatformName << "\n";
       }
     }
 }

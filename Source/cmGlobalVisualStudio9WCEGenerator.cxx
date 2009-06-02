@@ -11,6 +11,7 @@ cmGlobalVisualStudio9WCEGenerator::cmGlobalVisualStudio9WCEGenerator()
   // Get map of installed SDKs in system
   // Make default platform for the first one in map
   this->getInstalledSDKs();
+  this->EnableDeployment(true);
   if(!this->InstalledSDKs.empty())
     {
       this->PlatformName = this->InstalledSDKs.begin()->first.c_str();
@@ -50,7 +51,7 @@ cmLocalGenerator *cmGlobalVisualStudio9WCEGenerator::CreateLocalGenerator()
     }
 
   cmLocalVisualStudio7Generator *lg = new cmLocalVisualStudio7Generator;
-  lg->SetVersion8();
+  lg->SetVersion9();
   lg->SetPlatformName(this->PlatformName.c_str());
   lg->SetExtraFlagTable(this->GetExtraFlagTableVS8());
   lg->SetGlobalGenerator(this);

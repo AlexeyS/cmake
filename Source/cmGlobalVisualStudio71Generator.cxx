@@ -289,7 +289,7 @@ void cmGlobalVisualStudio71Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
 ::WriteProjectConfigurations(std::ostream& fout, const char* name,
-                             bool partOfDefaultBuild,
+                             cmTarget& t, bool partOfDefaultBuild,
                              const char* platformMapping)
 {
   std::string guid = this->GetGUID(name);
