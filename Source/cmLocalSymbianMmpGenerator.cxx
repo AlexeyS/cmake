@@ -176,8 +176,9 @@ void cmLocalSymbianMmpGenerator::AddIncludes(std::ostream& mmp)
     {
     std::string path = this->ConvertToRelativePath(
                                   StartOutputDirectoryComponents,
-                                  inc->c_str());
-    mmp << KeywordWithParam("SYSTEMINCLUDE") << path << std::endl;
+                                  inc->c_str(), true);
+    mmp << KeywordWithParam("SYSTEMINCLUDE")
+        << cmSystemTools::ConvertToOutputPath(path.c_str()) << std::endl;
     }
 
   if (includes.size() > 0)
@@ -239,9 +240,10 @@ void cmLocalSymbianMmpGenerator::AddSources(cmTarget& target,
       continue;
       }
     
+    std::string srcPath = this->ConvertToRelativePath(StartOutputDirectoryComponents,
+                                                      (*src)->GetFullPath().c_str(), true);
     mmp << KeywordWithParam("SOURCE");
-    mmp << this->ConvertToRelativePath(StartOutputDirectoryComponents,
-                                       (*src)->GetFullPath().c_str());
+    mmp << cmSystemTools::ConvertToOutputPath(srcPath.c_str());
     mmp << std::endl;
     }
 
@@ -251,10 +253,39 @@ void cmLocalSymbianMmpGenerator::AddSources(cmTarget& target,
     }
 }
 
+static bool cmp_libs(const cmTarget::LibraryID& l1, const cmTarget::LibraryID& l2)
+{
+    return l1.first < l2.first;
+}
+
+static bool eq_libs(const cmTarget::LibraryID& l1, const cmTarget::LibraryID& l2)
+{
+    std::string lib1 = l1.first;
+    std::string lib2 = l2.first;
+
+    std::transform(lib1.begin(), lib1.end(), lib1.begin(), tolower);
+    std::transform(lib2.begin(), lib2.end(), lib2.begin(), tolower);
+
+    if (! cmSystemTools::StringEndsWith(lib1.c_str(), ".lib"))
+        lib1 += ".lib";
+
+    if (! cmSystemTools::StringEndsWith(lib2.c_str(), ".lib"))
+        lib2 += ".lib";
+
+    return lib1 == lib2;
+}
+
 void cmLocalSymbianMmpGenerator::AddLibraries(cmTarget& target,
                                               std::ostream& mmp)
 {
-  cmTarget::LinkLibraryVectorType libraries = target.GetLinkLibraries();
+  cmTarget::LinkLibraryVectorType rawLibraries = target.GetLinkLibraries();
+  cmTarget::LinkLibraryVectorType libraries;
+
+  std::sort(rawLibraries.begin(), rawLibraries.end(), cmp_libs);
+  std::unique_copy(rawLibraries.begin(), rawLibraries.end(),
+                   std::back_insert_iterator<cmTarget::LinkLibraryVectorType>(libraries),
+                   eq_libs);
+
   cmTarget::LinkLibraryVectorType::iterator lib = libraries.begin();
   for (; lib != libraries.end(); ++lib)
     {
@@ -266,6 +297,7 @@ void cmLocalSymbianMmpGenerator::AddLibraries(cmTarget& target,
       {
       mmp << KeywordWithParam("LIBRARY");
       }
+
     mmp << lib->first;
     if (!cmSystemTools::StringEndsWith(lib->first.c_str(), ".lib"))
       {
@@ -313,9 +345,10 @@ bool cmLocalSymbianMmpGenerator::WriteMacros(std::ostream& mmp,
 void cmLocalSymbianMmpGenerator
 ::WriteGenericResource(const cmSymbianResource& res, std::ostream& mmp)
 {
+  std::string resPath = this->ConvertToRelativePath(StartOutputDirectoryComponents,
+                                                    res.filename.c_str(), true);
   mmp << KeywordWithParam("START RESOURCE");
-  mmp << this->ConvertToRelativePath(StartOutputDirectoryComponents,
-                                     res.filename.c_str());
+  mmp << cmSystemTools::ConvertToOutputPath(resPath.c_str());
   mmp << std::endl;
 
   if (!res.target.empty())
@@ -327,7 +360,7 @@ void cmLocalSymbianMmpGenerator
   if (!res.targetpath.empty())
     {
     mmp << MMP_INDENT << KeywordWithParam("TARGETPATH")
-        << res.targetpath << std::endl;
+        << cmSystemTools::ConvertToOutputPath(res.targetpath.c_str()) << std::endl;
     }
 
   if (res.header)
@@ -357,7 +390,7 @@ void cmLocalSymbianMmpGenerator::WriteBitmap(const cmSymbianResource& res,
   if (!res.targetpath.empty())
     {
     mmp << MMP_INDENT << KeywordWithParam("TARGETPATH")
-        << res.targetpath << std::endl;
+        << cmSystemTools::ConvertToOutputPath(res.targetpath.c_str()) << std::endl;
     }
 
   if (res.header)
@@ -371,7 +404,7 @@ void cmLocalSymbianMmpGenerator::WriteBitmap(const cmSymbianResource& res,
     mmp << MMP_INDENT << KeywordWithParam("SOURCE");
     mmp << img->depth << " ";
     mmp << this->ConvertToRelativePath(StartOutputDirectoryComponents,
-                                       img->filename.c_str());
+                                       img->filename.c_str(), true);
     mmp << std::endl;
     }
 
