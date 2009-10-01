@@ -43,6 +43,7 @@ void cmLocalSymbianMmpGenerator::WriteMmp(cmTarget& target)
   this->AddGenericOption(target, "EPOCSTACKSIZE", mmp);
   this->AddGenericOption(target, "EPOCHEAPSIZE", mmp);
   this->AddGenericOption(target, "CAPABILITY", mmp);
+  this->AddGenericOption(target, "EPOCALLOWDLLDATA", mmp);
   mmp << std::endl;
 
   this->AddDefinitions(target, mmp);
@@ -124,29 +125,40 @@ void cmLocalSymbianMmpGenerator::WriteCustomCommand(cmCustomCommand& cmd,
 void cmLocalSymbianMmpGenerator::WriteTargetType(cmTarget& target,
                                                  std::ostream& mmp)
 {
-  std::string varName = target.GetName();
-  varName += "_SYMBIAN_TARGETTYPE";
-  const char* targetType = Makefile->GetDefinition(varName.c_str());
-
-  if (!targetType)
+  std::string ext;
+  switch (target.GetType())
     {
-    switch (target.GetType())
-      {
-      case cmTarget::EXECUTABLE:
-        targetType = "exe";
-        break;
-      case cmTarget::SHARED_LIBRARY:
-        targetType = "dll";
-        break;
-      case cmTarget::STATIC_LIBRARY:
-        targetType = "lib";
-        break;
-      }
+    case cmTarget::EXECUTABLE:
+      ext = "exe";
+      break;
+    case cmTarget::SHARED_LIBRARY:
+      ext = "dll";
+      break;
+    case cmTarget::STATIC_LIBRARY:
+      ext = "lib";
+      break;
     }
 
-  mmp << KeywordWithParam("TARGET") << target.GetName()
-      << "." << targetType << std::endl;
+  const char* targetType = target.GetProperty("SYMBIAN_TARGETTYPE");
+  if(!targetType)
+    {
+    targetType = ext.c_str();
+    }
 
+  std::string targetName;
+  const char* targetProp = target.GetProperty("SYMBIAN_TARGET");
+  if(targetProp)
+    {
+        targetName = targetProp;
+    }
+
+  if(targetName.empty())
+    {
+    targetName = target.GetName();
+    targetName += "." + ext;
+    }
+
+  mmp << KeywordWithParam("TARGET") << targetName << std::endl;
   mmp << KeywordWithParam("TARGETTYPE") << targetType << std::endl;
 }
 
