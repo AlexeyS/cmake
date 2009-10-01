@@ -83,14 +83,14 @@ void cmLocalSymbianMmpGenerator::WriteHelperMakefile(cmTarget& target)
 
   for (size_t i = 0; i < target.GetPreLinkCommands().size(); ++i)
     {
-    this->WriteCustomCommand(target.GetPreBuildCommands()[i], mk);
+    this->WriteCustomCommand(target.GetPreLinkCommands()[i], mk);
     }
   mk << std::endl;
 
   mk << "final:" << std::endl;
-  for (size_t i = 0; i < target.GetPreLinkCommands().size(); ++i)
+  for (size_t i = 0; i < target.GetPostBuildCommands().size(); ++i)
     {
-    this->WriteCustomCommand(target.GetPreBuildCommands()[i], mk);
+    this->WriteCustomCommand(target.GetPostBuildCommands()[i], mk);
     }
   mk << std::endl;
 
