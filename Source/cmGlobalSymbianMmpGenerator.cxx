@@ -19,6 +19,24 @@ cmLocalGenerator *cmGlobalSymbianMmpGenerator::CreateLocalGenerator()
     return lg;
 }
 
+static int depth(cmLocalGenerator* g)
+{
+  cmLocalGenerator* parent = g->GetParent();
+  int result = 0;
+
+  while(parent)
+    {
+    ++result;
+    parent = parent->GetParent();
+    }
+  return result;
+}
+
+static bool less_depth(cmLocalGenerator* g1, cmLocalGenerator* g2)
+{
+  return depth(g1) < depth(g2);
+}
+
 void cmGlobalSymbianMmpGenerator::Generate()
 {
   cmGlobalGenerator::Generate();
@@ -32,13 +50,21 @@ void cmGlobalSymbianMmpGenerator::Generate()
   cmSystemTools::SplitPath(GetCMakeInstance()->GetStartOutputDirectory(),
                            basedir);
 
-  for (size_t i = 0; i < LocalGenerators.size(); ++i)
+  std::list<cmLocalGenerator*> locals;
+  // sort local generators to the build order
+  std::copy(LocalGenerators.begin(), LocalGenerators.end(),
+            std::back_insert_iterator<std::list<cmLocalGenerator*> >(locals));
+  locals.sort(less_depth);
+  locals.reverse();
+
+  std::list<cmLocalGenerator*>::const_iterator i;
+  for (i = locals.begin(); i != locals.end(); ++i)
     {
-    cmTargets targets = LocalGenerators[i]->GetMakefile()->GetTargets();
+    cmTargets targets = (*i)->GetMakefile()->GetTargets();
     
     for (cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
       {
-      cmLocalGenerator* local = LocalGenerators[i];
+      cmLocalGenerator* local = *i;
 
       if (t->second.GetType() == cmTarget::UTILITY)
           bld_inf << "gnumakefile ";
