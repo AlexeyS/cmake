@@ -104,8 +104,9 @@ void cmLocalSymbianMmpGenerator::WriteCustomCommand(cmCustomCommand& cmd,
 {
   if (cmd.GetComment() != NULL)
     {
-    mk << "\t@echo " << cmd.GetComment();
+    mk << "\t@echo " << cmd.GetComment() << std::endl;
     }
+
 
   const cmCustomCommandLines& cmdlines = cmd.GetCommandLines();
   cmCustomCommandLines::const_iterator i;
@@ -114,6 +115,12 @@ void cmLocalSymbianMmpGenerator::WriteCustomCommand(cmCustomCommand& cmd,
     const cmCustomCommandLine line = *i;
     cmCustomCommandLine::const_iterator j;
     mk << "\t";
+
+    if (cmd.GetWorkingDirectory())
+      {
+      mk << "cd " << cmSystemTools::ConvertToOutputPath(cmd.GetWorkingDirectory()) << " && ";
+      }
+
     for (j = line.begin(); j != line.end(); ++j)
       {
       mk << (j != line.begin() ? " " : "") << *j;
@@ -443,34 +450,9 @@ void cmLocalSymbianMmpGenerator::WriteMakefile(cmTarget& target)
   std::ofstream mk(filename.c_str());
 
   mk << "bld:" << std::endl;
-
-  cmCustomCommand* cmd = target.GetSourceFiles()[0]->GetCustomCommand();
-  if (cmd->GetWorkingDirectory())
+  for (size_t i = 0; i < target.GetSourceFiles().size(); ++i)
     {
-    std::string dir = cmd->GetWorkingDirectory();
-#ifdef _WIN32
-    for (unsigned int i = 0; i < dir.size(); ++i)
-      {
-      if (dir[i] == '/')
-        {
-        dir[i] = '\\';
-        }
-      }
-#endif
-      mk << "\t\tcd " <<  dir;
-    }
-
-  cmCustomCommandLines::const_iterator cmdline;
-  cmdline = cmd->GetCommandLines().begin();
-  for (; cmdline != cmd->GetCommandLines().end(); ++cmdline)
-    {
-    mk << ";";
-    std::vector<std::string>::const_iterator i = cmdline->begin();
-    mk << *(i++);
-    for (; i != cmdline->end(); ++i)
-      {
-      mk << " " << *i;
-      }
+    this->WriteCustomCommand(*target.GetSourceFiles()[i]->GetCustomCommand(), mk);
     }
 
   mk << std::endl;
