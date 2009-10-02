@@ -1,7 +1,8 @@
 #include "cmAddSymbianBitmapCommand.h"
 
-bool cmAddSymbianBitmapCommand::InitialPass(std::vector<std::string> const& args,
-                                            cmExecutionStatus&)
+bool cmAddSymbianBitmapCommand
+::InitialPass(std::vector<std::string> const& args,
+              cmExecutionStatus&)
 {
   if (args.size() < 3)
     return false;
@@ -27,7 +28,8 @@ bool cmAddSymbianBitmapCommand::InitialPass(std::vector<std::string> const& args
       {
       if (++i == args.end())
         {
-        SetError("The TARGETPATH argument must be followed by symbian target path");
+        SetError("The TARGETPATH argument must be followed by "
+                 "symbian target path");
         return false;
         }
         res.targetpath = *i;

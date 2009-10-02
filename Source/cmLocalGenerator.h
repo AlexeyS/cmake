@@ -243,7 +243,8 @@ public:
    * or quoted.
    */
   std::string ConvertToRelativePath(const std::vector<std::string>& local,
-                                    const char* remote);
+                                    const char* remote,
+                                    bool force = false);
 
   /**
    * Get the relative path from the generator output directory to a

@@ -19,6 +19,24 @@ cmLocalGenerator *cmGlobalSymbianMmpGenerator::CreateLocalGenerator()
     return lg;
 }
 
+static int depth(cmLocalGenerator* g)
+{
+  cmLocalGenerator* parent = g->GetParent();
+  int result = 0;
+
+  while(parent)
+    {
+    ++result;
+    parent = parent->GetParent();
+    }
+  return result;
+}
+
+static bool less_depth(cmLocalGenerator* g1, cmLocalGenerator* g2)
+{
+  return depth(g1) < depth(g2);
+}
+
 void cmGlobalSymbianMmpGenerator::Generate()
 {
   cmGlobalGenerator::Generate();
@@ -28,23 +46,36 @@ void cmGlobalSymbianMmpGenerator::Generate()
   std::ofstream bld_inf(filename.c_str());
   bld_inf << "prj_mmpfiles" << std::endl;
 
-  std::vector<std::string> basedir_components;
+  std::vector<std::string> basedir;
   cmSystemTools::SplitPath(GetCMakeInstance()->GetStartOutputDirectory(),
-                           basedir_components);
+                           basedir);
 
-  for (size_t i = 0; i < LocalGenerators.size(); ++i)
+  std::list<cmLocalGenerator*> locals;
+  // sort local generators to the build order
+  std::copy(LocalGenerators.begin(), LocalGenerators.end(),
+            std::back_insert_iterator<std::list<cmLocalGenerator*> >(locals));
+  locals.sort(less_depth);
+  locals.reverse();
+
+  std::list<cmLocalGenerator*>::const_iterator i;
+  for (i = locals.begin(); i != locals.end(); ++i)
     {
-    cmTargets targets = LocalGenerators[i]->GetMakefile()->GetTargets();
+    cmTargets targets = (*i)->GetMakefile()->GetTargets();
     
     for (cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
       {
+      cmLocalGenerator* local = *i;
+
       if (t->second.GetType() == cmTarget::UTILITY)
           bld_inf << "gnumakefile ";
 
-      std::string prj = LocalGenerators[i]->GetMakefile()->GetStartOutputDirectory();
+      std::string prj = local->GetMakefile()->GetCurrentOutputDirectory();
       prj += (prj.length() > 0 ? "/" : "");
-      prj += t->first + (t->second.GetType() == cmTarget::UTILITY ? ".mk" : ".mmp");
-      bld_inf << LocalGenerators[i]->ConvertToRelativePath(basedir_components, prj.c_str()) << std::endl;
+      prj += t->first;
+      prj += (t->second.GetType() == cmTarget::UTILITY ? "Utils.mk" : ".mmp");
+      std::string componentPath = local->ConvertToRelativePath(basedir, prj.c_str());
+      bld_inf << cmSystemTools::ConvertToOutputPath(componentPath.c_str());
+      bld_inf << std::endl;
 
       if (t->second.GetType() != cmTarget::UTILITY)
         {
@@ -53,17 +84,23 @@ void cmGlobalSymbianMmpGenerator::Generate()
                                   t->second.GetPostBuildCommands().size();
         if (customStepsCount > 0)
           {
-              std::string helperMakefile = t->first;
-              helperMakefile += ".mk";
+              std::string helperMk = local->GetMakefile()->GetCurrentOutputDirectory();
+              helperMk += (helperMk.length() > 0 ? "/" : "");
+              helperMk += t->first;
+              helperMk += "Utils.mk";
               bld_inf << "gnumakefile ";
-              bld_inf << LocalGenerators[i]->ConvertToRelativePath(basedir_components, helperMakefile.c_str()) << std::endl;
+              std::string helperPath = local->ConvertToRelativePath(basedir,
+                                                                    helperMk.c_str());
+              bld_inf << cmSystemTools::ConvertToOutputPath(helperPath.c_str());
+              bld_inf << std::endl;
           }
         }
       }
     }
 }
 
-void cmGlobalSymbianMmpGenerator::GetDocumentation(cmDocumentationEntry& entry) const
+void cmGlobalSymbianMmpGenerator
+::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.Name  = this->GetName();
   entry.Brief = "Generates Symbian SDK .mmp project files.";

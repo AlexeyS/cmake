@@ -1,7 +1,8 @@
 #include "cmAddSymbianResourceCommand.h"
 
-bool cmAddSymbianResourceCommand::InitialPass(std::vector<std::string> const &args,
-                                              cmExecutionStatus&)
+bool cmAddSymbianResourceCommand
+::InitialPass(std::vector<std::string> const &args,
+              cmExecutionStatus&)
 {
   if (args.size() < 3)
     return false;
@@ -27,7 +28,8 @@ bool cmAddSymbianResourceCommand::InitialPass(std::vector<std::string> const &ar
       {
       if (++i == args.end())
         {
-        SetError("The TARGET argument must be followed by symbian target file name");
+        SetError("The TARGET argument must be followed by symbian "
+                 "target file name");
         return false;
         }
       res.target = *i;
@@ -36,7 +38,8 @@ bool cmAddSymbianResourceCommand::InitialPass(std::vector<std::string> const &ar
       {
       if (++i == args.end())
         {
-            SetError("The TARGETPATH argument must be followed by symbian target path");
+            SetError("The TARGETPATH argument must be followed by "
+                     "symbian target path");
             return false;
         }
       res.targetpath = *i;

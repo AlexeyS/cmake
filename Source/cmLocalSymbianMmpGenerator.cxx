@@ -20,89 +20,93 @@ void cmLocalSymbianMmpGenerator::Generate()
     {
     if (i->second.GetType() == cmTarget::UTILITY)
       {
-      writeMakefile(i->second);
+      this->WriteMakefile(i->second);
       }
     else
       {
-      writeMmp(i->second);
+      this->WriteMmp(i->second);
       }
     }
 }
 
-void cmLocalSymbianMmpGenerator::writeMmp(cmTarget& target)
+void cmLocalSymbianMmpGenerator::WriteMmp(cmTarget& target)
 {
   std::string targetName = target.GetName();
   std::string filename = Makefile->GetStartOutputDirectory();
   filename += "/" + targetName + ".mmp";
   std::ofstream mmp(filename.c_str());
 
-  writeTargetType(target, mmp);
-  addGenericOption(target, "UID", mmp);
-  addGenericOption(target, "SECUREID", mmp);
-  addGenericOption(target, "VENDORID", mmp);
-  addGenericOption(target, "EPOCSTACKSIZE", mmp);
-  addGenericOption(target, "EPOCHEAPSIZE", mmp);
-  addGenericOption(target, "CAPABILITY", mmp);
+  this->WriteTargetType(target, mmp);
+  this->AddGenericOption(target, "UID", mmp);
+  this->AddGenericOption(target, "SECUREID", mmp);
+  this->AddGenericOption(target, "VENDORID", mmp);
+  this->AddGenericOption(target, "EPOCSTACKSIZE", mmp);
+  this->AddGenericOption(target, "EPOCHEAPSIZE", mmp);
+  this->AddGenericOption(target, "CAPABILITY", mmp);
+  this->AddGenericOption(target, "EPOCALLOWDLLDATA", mmp);
   mmp << std::endl;
 
-  addDefinitions(target, mmp);
-  addRawData(target, mmp);
+  this->AddDefinitions(target, mmp);
+  this->AddRawData(target, mmp);
 
-  addResources(target, mmp);
-  addIncludes(mmp);
-  addSources(target, mmp);
+  this->AddResources(target, mmp);
+  this->AddIncludes(mmp);
+  this->AddSources(target, mmp);
 
   if (target.GetType() != cmTarget::STATIC_LIBRARY)
     {
-    addLibraries(target, mmp);
+    this->AddLibraries(target, mmp);
     }
 
   size_t customCommandsCount = target.GetPreBuildCommands().size() +
-                               target.GetPreLinkCommands().size() +
+                               target.GetPreLinkCommands().size()  +
                                target.GetPostBuildCommands().size();
 
   if (customCommandsCount > 0)
     {
-    writeHelperMakefile(target);
+    this->WriteHelperMakefile(target);
     }
 }
 
-void cmLocalSymbianMmpGenerator::writeHelperMakefile(cmTarget& target)
+void cmLocalSymbianMmpGenerator::WriteHelperMakefile(cmTarget& target)
 {
   std::string filename = Makefile->GetStartOutputDirectory();
   filename += "/";
   filename += target.GetName();
-  filename += ".mk";
+  filename += "Utils.mk";
   std::ofstream mk(filename.c_str());
   
   mk << "bld:" << std::endl;
   for (size_t i = 0; i < target.GetPreBuildCommands().size(); ++i)
     {
-    writeCustomCommand(target.GetPreBuildCommands()[i], mk);
+    this->WriteCustomCommand(target.GetPreBuildCommands()[i], mk);
     }
 
   for (size_t i = 0; i < target.GetPreLinkCommands().size(); ++i)
     {
-    writeCustomCommand(target.GetPreBuildCommands()[i], mk);
+    this->WriteCustomCommand(target.GetPreLinkCommands()[i], mk);
     }
   mk << std::endl;
 
   mk << "final:" << std::endl;
-  for (size_t i = 0; i < target.GetPreLinkCommands().size(); ++i)
+  for (size_t i = 0; i < target.GetPostBuildCommands().size(); ++i)
     {
-    writeCustomCommand(target.GetPreBuildCommands()[i], mk);
+    this->WriteCustomCommand(target.GetPostBuildCommands()[i], mk);
     }
   mk << std::endl;
 
-  mk << "makmake freeze lib cleanlib clean resource savespace releaseables:" << std::endl;
+  mk << "makmake freeze lib cleanlib clean resource"
+     << " savespace releaseables:" << std::endl;
 }
 
-void cmLocalSymbianMmpGenerator::writeCustomCommand(cmCustomCommand& cmd, std::ostream& mk)
+void cmLocalSymbianMmpGenerator::WriteCustomCommand(cmCustomCommand& cmd,
+                                                    std::ostream& mk)
 {
   if (cmd.GetComment() != NULL)
     {
-    mk << "\t@echo " << cmd.GetComment();
+    mk << "\t@echo " << cmd.GetComment() << std::endl;
     }
+
 
   const cmCustomCommandLines& cmdlines = cmd.GetCommandLines();
   cmCustomCommandLines::const_iterator i;
@@ -111,6 +115,12 @@ void cmLocalSymbianMmpGenerator::writeCustomCommand(cmCustomCommand& cmd, std::o
     const cmCustomCommandLine line = *i;
     cmCustomCommandLine::const_iterator j;
     mk << "\t";
+
+    if (cmd.GetWorkingDirectory())
+      {
+      mk << "cd " << cmSystemTools::ConvertToOutputPath(cmd.GetWorkingDirectory()) << " && ";
+      }
+
     for (j = line.begin(); j != line.end(); ++j)
       {
       mk << (j != line.begin() ? " " : "") << *j;
@@ -119,101 +129,119 @@ void cmLocalSymbianMmpGenerator::writeCustomCommand(cmCustomCommand& cmd, std::o
     }
 }
 
-void cmLocalSymbianMmpGenerator::writeTargetType(cmTarget& target, std::ostream& mmp)
+void cmLocalSymbianMmpGenerator::WriteTargetType(cmTarget& target,
+                                                 std::ostream& mmp)
 {
-  std::string varName = target.GetName();
-  varName += "_SYMBIAN_TARGETTYPE";
-  const char* targettype = Makefile->GetDefinition(varName.c_str());
-
-  if (!targettype)
+  std::string ext;
+  switch (target.GetType())
     {
-    switch (target.GetType())
-      {
-      case cmTarget::EXECUTABLE:
-        targettype = "exe";
-        break;
-      case cmTarget::SHARED_LIBRARY:
-        targettype = "dll";
-        break;
-      case cmTarget::STATIC_LIBRARY:
-        targettype = "lib";
-        break;
-      }
+    case cmTarget::EXECUTABLE:
+      ext = "exe";
+      break;
+    case cmTarget::SHARED_LIBRARY:
+      ext = "dll";
+      break;
+    case cmTarget::STATIC_LIBRARY:
+      ext = "lib";
+      break;
     }
 
-  mmp << keyword_with_param("TARGET") << target.GetName()
-      << "." << targettype_extension(targettype) << std::endl;
-
-  mmp << keyword_with_param("TARGETTYPE") << targettype << std::endl;
-}
-
-std::string cmLocalSymbianMmpGenerator::addGenericOption(cmTarget& target,
-                                                         const std::string& option,
-                                                         std::ostream& mmp)
-{
-  std::string varName = target.GetName();
-  varName += "_SYMBIAN_" + option;
-  const char* raw_value = Makefile->GetDefinition(varName.c_str());
-
-  if (raw_value)
+  const char* targetType = target.GetProperty("SYMBIAN_TARGETTYPE");
+  if(!targetType)
     {
-    std::string value = raw_value;
-    replaceSemicolons(value, ' ');
-    mmp << keyword_with_param(option) << value << std::endl;
+    targetType = ext.c_str();
     }
 
-  return raw_value ? raw_value : "";
+  std::string targetName;
+  const char* targetProp = target.GetProperty("SYMBIAN_TARGET");
+  if(targetProp)
+    {
+        targetName = targetProp;
+    }
+
+  if(targetName.empty())
+    {
+    targetName = target.GetName();
+    targetName += "." + ext;
+    }
+
+  mmp << KeywordWithParam("TARGET") << targetName << std::endl;
+  mmp << KeywordWithParam("TARGETTYPE") << targetType << std::endl;
 }
 
-void cmLocalSymbianMmpGenerator::addIncludes(std::ostream& mmp)
+std::string cmLocalSymbianMmpGenerator
+::AddGenericOption(cmTarget& target,
+                   const std::string& option,
+                   std::ostream& mmp)
+{
+  std::string propName = "SYMBIAN_" + option;
+  const char* rawValue = target.GetProperty(propName.c_str());
+
+  if (rawValue)
+    {
+    std::string value = rawValue;
+    this->ReplaceSemicolons(value, ' ');
+    mmp << KeywordWithParam(option) << value << std::endl;
+    }
+
+  return rawValue ? rawValue : "";
+}
+
+void cmLocalSymbianMmpGenerator::AddIncludes(std::ostream& mmp)
 {
   std::vector<std::string>& includes = Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator inc = includes.begin();
   for (; inc != includes.end(); ++inc)
     {
-    std::string path = ConvertToRelativePath(StartOutputDirectoryComponents,
-                                             inc->c_str());
-    mmp << keyword_with_param("SYSTEMINCLUDE") << path << std::endl;
+    std::string path = this->ConvertToRelativePath(
+                                  StartOutputDirectoryComponents,
+                                  inc->c_str(), true);
+    mmp << KeywordWithParam("SYSTEMINCLUDE")
+        << cmSystemTools::ConvertToOutputPath(path.c_str()) << std::endl;
     }
 
   if (includes.size() > 0)
     {
-       mmp << std::endl;
+    mmp << std::endl;
     }
 }
 
-void cmLocalSymbianMmpGenerator::addDefinitions(cmTarget& target, std::ostream& mmp)
+void cmLocalSymbianMmpGenerator::AddDefinitions(cmTarget& target,
+                                                std::ostream& mmp)
 {
-  bool need_newline = false;
+  bool needNewline = false;
 
-  if (writeMacros(mmp, Makefile->GetProperty("COMPILE_DEFINITIONS")))
-    need_newline = true;
+  if (this->WriteMacros(mmp, Makefile->GetProperty("COMPILE_DEFINITIONS")))
+    needNewline = true;
 
-  if (writeMacros(mmp, target.GetProperty("COMPILE_DEFINITIONS")))
-    need_newline = true;
+  if (this->WriteMacros(mmp, target.GetProperty("COMPILE_DEFINITIONS")))
+    needNewline = true;
   
-  if (need_newline)
+  if (needNewline)
     mmp << std::endl;
 }
 
-void cmLocalSymbianMmpGenerator::addResources(cmTarget& target, std::ostream& mmp)
+void cmLocalSymbianMmpGenerator::AddResources(cmTarget& target,
+                                              std::ostream& mmp)
 {
-  const std::vector<cmSymbianResource>& resources = target.GetSymbianResources();
+  const std::vector<cmSymbianResource>& resources =
+                                            target.GetSymbianResources();
   std::vector<cmSymbianResource>::const_iterator res = resources.begin();
   for (; res != resources.end(); ++res)
     {
     if (res->type == cmSymbianResource::GENERIC)
       {
-      writeGenericResource(*res, mmp);
+      this->WriteGenericResource(*res, mmp);
       }
     else if (res->type == cmSymbianResource::BITMAP)
       {
-      writeBitmap(*res, mmp);
+      this->WriteBitmap(*res, mmp);
       }
     }
 }
 
-void cmLocalSymbianMmpGenerator::addSources(cmTarget& target, std::ostream& mmp)
+void cmLocalSymbianMmpGenerator::AddSources(cmTarget& target,
+                                            std::ostream& mmp)
 {
   std::vector<cmSourceFile*> const& sources = target.GetSourceFiles();
   std::vector<cmSourceFile*>::const_iterator src = sources.begin();
@@ -231,9 +259,10 @@ void cmLocalSymbianMmpGenerator::addSources(cmTarget& target, std::ostream& mmp)
       continue;
       }
     
-    mmp << keyword_with_param("SOURCE");
-    mmp << ConvertToRelativePath(StartOutputDirectoryComponents,
-                                 (*src)->GetFullPath().c_str());
+    std::string srcPath = this->ConvertToRelativePath(StartOutputDirectoryComponents,
+                                                      (*src)->GetFullPath().c_str(), true);
+    mmp << KeywordWithParam("SOURCE");
+    mmp << cmSystemTools::ConvertToOutputPath(srcPath.c_str());
     mmp << std::endl;
     }
 
@@ -243,22 +272,56 @@ void cmLocalSymbianMmpGenerator::addSources(cmTarget& target, std::ostream& mmp)
     }
 }
 
-void cmLocalSymbianMmpGenerator::addLibraries(cmTarget& target, std::ostream& mmp)
+static bool cmp_libs(const cmTarget::LibraryID& l1, const cmTarget::LibraryID& l2)
 {
-  cmTarget::LinkLibraryVectorType libraries = target.GetLinkLibraries();
+    return l1.first < l2.first;
+}
+
+static bool eq_libs(const cmTarget::LibraryID& l1, const cmTarget::LibraryID& l2)
+{
+    std::string lib1 = l1.first;
+    std::string lib2 = l2.first;
+
+    std::transform(lib1.begin(), lib1.end(), lib1.begin(), tolower);
+    std::transform(lib2.begin(), lib2.end(), lib2.begin(), tolower);
+
+    if (! cmSystemTools::StringEndsWith(lib1.c_str(), ".lib"))
+        lib1 += ".lib";
+
+    if (! cmSystemTools::StringEndsWith(lib2.c_str(), ".lib"))
+        lib2 += ".lib";
+
+    return lib1 == lib2;
+}
+
+void cmLocalSymbianMmpGenerator::AddLibraries(cmTarget& target,
+                                              std::ostream& mmp)
+{
+  cmTarget::LinkLibraryVectorType rawLibraries = target.GetLinkLibraries();
+  cmTarget::LinkLibraryVectorType libraries;
+
+  std::sort(rawLibraries.begin(), rawLibraries.end(), cmp_libs);
+  std::unique_copy(rawLibraries.begin(), rawLibraries.end(),
+                   std::back_insert_iterator<cmTarget::LinkLibraryVectorType>(libraries),
+                   eq_libs);
+
   cmTarget::LinkLibraryVectorType::iterator lib = libraries.begin();
   for (; lib != libraries.end(); ++lib)
     {
     if (lib->second != cmTarget::IMPORT)
       {
-      mmp << keyword_with_param("STATICLIBRARY");
+      mmp << KeywordWithParam("STATICLIBRARY");
       }
     else
       {
-      mmp << keyword_with_param("LIBRARY");
+      mmp << KeywordWithParam("LIBRARY");
       }
+
     mmp << lib->first;
-    mmp << (cmSystemTools::StringEndsWith(lib->first.c_str(), ".lib") ? "" : ".lib");
+    if (!cmSystemTools::StringEndsWith(lib->first.c_str(), ".lib"))
+      {
+      mmp << ".lib";
+      }
     mmp << std::endl;
     }
 
@@ -268,50 +331,55 @@ void cmLocalSymbianMmpGenerator::addLibraries(cmTarget& target, std::ostream& mm
     }
 }
 
-void cmLocalSymbianMmpGenerator::addRawData(cmTarget& target, std::ostream& mmp)
+void cmLocalSymbianMmpGenerator::AddRawData(cmTarget& target,
+                                            std::ostream& mmp)
 {
   std::string varName = target.GetName();
   varName += "_SYMBIAN_RAW_DATA";
-  const char* raw_value = Makefile->GetDefinition(varName.c_str());
+  const char* rawValue = Makefile->GetDefinition(varName.c_str());
 
-  if (raw_value)
+  if (rawValue)
     {
-    std::string value = raw_value;
-    replaceSemicolons(value, '\n');
+    std::string value = rawValue;
+    ReplaceSemicolons(value, '\n');
     mmp << value << std::endl;
     mmp << std::endl;
     }
 }
 
-bool cmLocalSymbianMmpGenerator::writeMacros(std::ostream& mmp, const char* macros)
+bool cmLocalSymbianMmpGenerator::WriteMacros(std::ostream& mmp,
+                                             const char* macros)
 {
   if (! macros)
+    {
     return false;
+    }
 
   std::string values = macros;
-  replaceSemicolons(values, ' ');
-  mmp << keyword_with_param("MACRO") << values << std::endl;
+  ReplaceSemicolons(values, ' ');
+  mmp << KeywordWithParam("MACRO") << values << std::endl;
   return true;
 }
 
-void cmLocalSymbianMmpGenerator::writeGenericResource(const cmSymbianResource& res,
-                                                      std::ostream& mmp)
+void cmLocalSymbianMmpGenerator
+::WriteGenericResource(const cmSymbianResource& res, std::ostream& mmp)
 {
-  mmp << keyword_with_param("START RESOURCE");
-  mmp << ConvertToRelativePath(StartOutputDirectoryComponents,
-                               res.filename.c_str());
+  std::string resPath = this->ConvertToRelativePath(StartOutputDirectoryComponents,
+                                                    res.filename.c_str(), true);
+  mmp << KeywordWithParam("START RESOURCE");
+  mmp << cmSystemTools::ConvertToOutputPath(resPath.c_str());
   mmp << std::endl;
 
   if (!res.target.empty())
     {
-    mmp << MMP_INDENT << keyword_with_param("TARGET")
+    mmp << MMP_INDENT << KeywordWithParam("TARGET")
         << res.target << std::endl;
     }
 
   if (!res.targetpath.empty())
     {
-    mmp << MMP_INDENT << keyword_with_param("TARGETPATH")
-        << res.targetpath << std::endl;
+    mmp << MMP_INDENT << KeywordWithParam("TARGETPATH")
+        << cmSystemTools::ConvertToOutputPath(res.targetpath.c_str()) << std::endl;
     }
 
   if (res.header)
@@ -321,27 +389,27 @@ void cmLocalSymbianMmpGenerator::writeGenericResource(const cmSymbianResource& r
 
   if (!res.lang.empty())
     {
-    mmp << MMP_INDENT << keyword_with_param("LANG")
+    mmp << MMP_INDENT << KeywordWithParam("LANG")
         << res.lang << std::endl;
     }
 
   if (!res.uid.empty())
     {
-    mmp << MMP_INDENT << keyword_with_param("UID") << res.uid << std::endl;
+    mmp << MMP_INDENT << KeywordWithParam("UID") << res.uid << std::endl;
     }
 
   mmp << "END" << std::endl << std::endl;
 }
 
-void cmLocalSymbianMmpGenerator::writeBitmap(const cmSymbianResource& res,
+void cmLocalSymbianMmpGenerator::WriteBitmap(const cmSymbianResource& res,
                                              std::ostream& mmp)
 {
-  mmp << keyword_with_param("START BITMAP") << res.target << std::endl;
+  mmp << KeywordWithParam("START BITMAP") << res.target << std::endl;
 
   if (!res.targetpath.empty())
     {
-    mmp << MMP_INDENT << keyword_with_param("TARGETPATH")
-        << res.targetpath << std::endl;
+    mmp << MMP_INDENT << KeywordWithParam("TARGETPATH")
+        << cmSystemTools::ConvertToOutputPath(res.targetpath.c_str()) << std::endl;
     }
 
   if (res.header)
@@ -352,10 +420,10 @@ void cmLocalSymbianMmpGenerator::writeBitmap(const cmSymbianResource& res,
   std::list<cmSymbianBitmapSource>::const_iterator img = res.images.begin();
   for (; img != res.images.end(); ++img)
     {
-    mmp << MMP_INDENT << keyword_with_param("SOURCE");
+    mmp << MMP_INDENT << KeywordWithParam("SOURCE");
     mmp << img->depth << " ";
-    mmp << ConvertToRelativePath(StartOutputDirectoryComponents,
-                                 img->filename.c_str());
+    mmp << this->ConvertToRelativePath(StartOutputDirectoryComponents,
+                                       img->filename.c_str(), true);
     mmp << std::endl;
     }
 
@@ -363,7 +431,7 @@ void cmLocalSymbianMmpGenerator::writeBitmap(const cmSymbianResource& res,
 }
 
 std::string
-cmLocalSymbianMmpGenerator::keyword_with_param(const std::string& option)
+cmLocalSymbianMmpGenerator::KeywordWithParam(const std::string& option)
 {
   std::string keyword = option;
   for (unsigned int i = 0; i < MMP_COLUMN_WIDTH - option.length() + 1; ++i)
@@ -374,56 +442,27 @@ cmLocalSymbianMmpGenerator::keyword_with_param(const std::string& option)
   return keyword;
 }
 
-std::string
-cmLocalSymbianMmpGenerator::targettype_extension(const std::string& targettype)
-{
-    return targettype;
-}
-
-void cmLocalSymbianMmpGenerator::writeMakefile(cmTarget& target)
+void cmLocalSymbianMmpGenerator::WriteMakefile(cmTarget& target)
 {
   std::string targetName = target.GetName();
   std::string filename = Makefile->GetStartOutputDirectory();
-  filename += "/" + targetName + ".mk";
+  filename += "/" + targetName + "Utils.mk";
   std::ofstream mk(filename.c_str());
 
   mk << "bld:" << std::endl;
-
-  cmCustomCommand* cmd = target.GetSourceFiles()[0]->GetCustomCommand();
-
-  if (cmd->GetWorkingDirectory())
+  for (size_t i = 0; i < target.GetSourceFiles().size(); ++i)
     {
-    std::string dir = cmd->GetWorkingDirectory();
-#ifdef _WIN32
-    for (unsigned int i = 0; i < dir.size(); ++i)
-      {
-      if (dir[i] == '/')
-        {
-        dir[i] = '\\';
-        }
-      }
-#endif
-      mk << "\t\tcd " <<  dir;
-    }
-
-  cmCustomCommandLines::const_iterator cmdline = cmd->GetCommandLines().begin();
-  for (; cmdline != cmd->GetCommandLines().end(); ++cmdline)
-    {
-    mk << ";";
-    std::vector<std::string>::const_iterator i = cmdline->begin();
-    mk << *(i++);
-    for (; i != cmdline->end(); ++i)
-      {
-      mk << " " << *i;
-      }
+    this->WriteCustomCommand(*target.GetSourceFiles()[i]->GetCustomCommand(), mk);
     }
 
   mk << std::endl;
-  mk << "makmake freeze lib cleanlib clean final resource savespace releaseables:";
+  mk << "makmake freeze lib cleanlib clean final"
+     << " resource savespace releaseables:";
   mk << std::endl << std::endl;
 }
 
-void cmLocalSymbianMmpGenerator::replaceSemicolons(std::string& s, char newSeparator)
+void cmLocalSymbianMmpGenerator::ReplaceSemicolons(std::string& s,
+                                                   char newSeparator)
 {
   std::string::size_type semicolon_pos = s.find(';');
   while (semicolon_pos != std::string::npos)
