@@ -25,7 +25,6 @@ private:
   void AddDefinitions(cmTarget& target, std::ostream& mmp);
   void AddRawData(cmTarget& target, std::ostream& mmp);
 
-  bool WriteMacros(std::ostream& mmp, const char* macros);
   void WriteGenericResource(const cmSymbianResource& res,
                             std::ostream& mmp);
 

@@ -209,15 +209,34 @@ void cmLocalSymbianMmpGenerator::AddIncludes(std::ostream& mmp)
 void cmLocalSymbianMmpGenerator::AddDefinitions(cmTarget& target,
                                                 std::ostream& mmp)
 {
-  bool needNewline = false;
+  std::vector<cmStdString> defs; // cmSystemTools::Split returns vector :(
 
-  if (this->WriteMacros(mmp, Makefile->GetProperty("COMPILE_DEFINITIONS")))
-    needNewline = true;
+  const char* prop = Makefile->GetProperty("COMPILE_DEFINITIONS");
+  if (prop)
+    {
+    defs = cmSystemTools::SplitString(prop, ';');
+    }
 
-  if (this->WriteMacros(mmp, target.GetProperty("COMPILE_DEFINITIONS")))
-    needNewline = true;
-  
-  if (needNewline)
+  prop = target.GetProperty("COMPILE_DEFINITIONS");
+  if (prop)
+    {
+    std::vector<cmStdString> targetDefs = cmSystemTools::SplitString(prop, ';');
+    std::copy(targetDefs.begin(), targetDefs.end(),
+              std::back_insert_iterator<std::vector<cmStdString> >(defs));
+    }
+
+  std::sort(defs.begin(), defs.end());
+  std::vector<cmStdString>::iterator uniqueEnd;
+  uniqueEnd = std::unique(defs.begin(), defs.end());
+
+  for (std::vector<cmStdString>::const_iterator i = defs.begin();
+       i != uniqueEnd;
+       ++i)
+    {
+    mmp << KeywordWithParam("MACRO") << *i << std::endl;
+    }
+
+  if (defs.begin() != uniqueEnd)
     mmp << std::endl;
 }
 
@@ -345,20 +364,6 @@ void cmLocalSymbianMmpGenerator::AddRawData(cmTarget& target,
     mmp << value << std::endl;
     mmp << std::endl;
     }
-}
-
-bool cmLocalSymbianMmpGenerator::WriteMacros(std::ostream& mmp,
-                                             const char* macros)
-{
-  if (! macros)
-    {
-    return false;
-    }
-
-  std::string values = macros;
-  ReplaceSemicolons(values, ' ');
-  mmp << KeywordWithParam("MACRO") << values << std::endl;
-  return true;
 }
 
 void cmLocalSymbianMmpGenerator
