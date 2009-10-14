@@ -74,6 +74,7 @@
 #  endif
 #  include "cmGlobalMSYSMakefileGenerator.h"
 #  include "cmGlobalMinGWMakefileGenerator.h"
+#  include "cmGlobalSymbianMakefileGenerator.h"
 #  include "cmWin32ProcessExecution.h"
 #else
 #endif
@@ -2424,6 +2425,8 @@ void cmake::AddDefaultGenerators()
     &cmGlobalNMakeMakefileGenerator::New;
   this->Generators[cmGlobalWatcomWMakeGenerator::GetActualName()] =
     &cmGlobalWatcomWMakeGenerator::New;
+  this->Generators[cmGlobalSymbianMakefileGenerator::GetActualName()] =
+    &cmGlobalSymbianMakefileGenerator::New;
 # endif
   this->Generators[cmGlobalMSYSMakefileGenerator::GetActualName()] =
     &cmGlobalMSYSMakefileGenerator::New;
