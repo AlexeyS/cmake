@@ -27,12 +27,10 @@ public:
                               cmMakefile *, bool optional);
 
 private:
-  bool SelectToolchain(const std::string& name);
-  std::string GetStdLibPath() const;
+  bool SelectToolchain(cmMakefile* mf, const std::string& name);
 
 private:
   std::string SDKPath;
-  std::map<std::string, std::string> ToolchainDefs;
 };
 
 #endif

@@ -77,14 +77,11 @@ cmGlobalSymbianMakefileGenerator::cmGlobalSymbianMakefileGenerator()
     }
 
   this->SDKPath = *parser.SDKs.begin();
-  this->SelectToolchain("gcce");
 }
 
 bool cmGlobalSymbianMakefileGenerator
-::SelectToolchain(const std::string& name)
+::SelectToolchain(cmMakefile* mf, const std::string& name)
 {
-  this->ToolchainDefs.clear();
-
   const std::string path = SDKPath +
               "\\Epoc32\\tools\\compilation_config\\" + name + ".mk";
 
@@ -119,9 +116,9 @@ bool cmGlobalSymbianMakefileGenerator
         std::string::size_type eqPos = line.find('=');
         if (eqPos != std::string::npos)
           {
-          std::string varName = line.substr(0, eqPos);
+          std::string varName = "SYMBIAN_" + line.substr(0, eqPos);
           std::string varValue = line.substr(eqPos+1);
-          this->ToolchainDefs.insert(std::make_pair(varName, varValue));
+          mf->AddDefinition(varName.c_str(), varValue.c_str());
           }
         line.clear();
         commentLine = false;
@@ -140,57 +137,22 @@ void cmGlobalSymbianMakefileGenerator
                  cmMakefile *mf, 
                  bool optional)
 {
-  // pick a default 
   mf->AddDefinition("SYMBIAN", "1");
-  mf->AddDefinition("CMAKE_QUOTE_INCLUDE_PATHS", "1");
-
-  const std::string cc = this->ToolchainDefs["CC"];
-  mf->AddDefinition("CMAKE_GENERATOR_CC", cc.c_str());
-  mf->AddDefinition("CMAKE_GENERATOR_CXX", cc.c_str());
-
-  // load GCCE toolchain file
-  mf->AddDefinition("CMAKE_C_COMPILER_LOADED", "1");
-  mf->AddDefinition("CMAKE_CXX_COMPILER_LOADED", "1");
-
-  mf->AddDefinition("CMAKE_C_COMPILER", cc.c_str());
-  mf->AddDefinition("CMAKE_CXX_COMPILER", cc.c_str());
-
   mf->AddDefinition("CMAKE_SYSTEM", "Symbian");
   mf->AddDefinition("CMAKE_SYSTEM_NAME", "Symbian");
 
-  std::string ld = ToolchainDefs["LD"];
-  std::string linkRule = ld + " <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET>";
-  mf->AddDefinition("CMAKE_C_LINK_EXECUTABLE", linkRule.c_str());
-  mf->AddDefinition("CMAKE_CXX_LINK_EXECUTABLE", linkRule.c_str());
+  mf->AddDefinition("SYMBIAN_SDK_PATH", SDKPath.c_str());
 
-  mf->AddCacheDefinition("CMAKE_C_FLAGS",
-                         this->ToolchainDefs["C_LANG_OPTION"].c_str(),
-                         "", cmCacheManager::STRING);
-
-  mf->AddCacheDefinition("CMAKE_CXX_FLAGS",
-                         this->ToolchainDefs["CPP_LANG_OPTION"].c_str(),
-                         "", cmCacheManager::STRING);
-
-  std::string stdLibPath = GetStdLibPath();
-  std::string linkFlags = this->ToolchainDefs["LINKER_ENTRY_OPTION"] +
-                          " _E32Startup";
-
-  linkFlags += " " + this->ToolchainDefs["STATIC_LIBS_PATH"] + " " +
-               "\"" + stdLibPath + "\" " +
-               this->ToolchainDefs["STATIC_LIBS_LIST"];
-
-  std::string epocLibPath = this->SDKPath + "\\EPOC32\\RELEASE\\ARMV5\\LIB";
-  std::vector<cmsys::String> libs;
-  const char* rtLibsList = this->ToolchainDefs["RUNTIME_LIBS_LIST"].c_str();
-  libs = cmSystemTools::SplitString(rtLibsList, ' ');
-  for (unsigned int i = 0; i < libs.size(); ++i)
+  if(!mf->GetDefinition("SYMBIAN_TOOLCHAIN"))
     {
-    linkFlags += " \"" + epocLibPath + "\\" + libs[i] + "\"";
+    mf->AddCacheDefinition("SYMBIAN_TOOLCHAIN", "GCCE", "",
+                           cmCacheManager::STRING);
     }
 
-  mf->AddCacheDefinition("CMAKE_EXE_LINKER_FLAGS",
-                         linkFlags.c_str(),
-                         "", cmCacheManager::STRING);
+  this->SelectToolchain(mf, mf->GetDefinition("SYMBIAN_TOOLCHAIN"));
+
+  mf->AddDefinition("CMAKE_GENERATOR_CC", mf->GetDefinition("SYMBIAN_CC"));
+  mf->AddDefinition("CMAKE_GENERATOR_CXX", mf->GetDefinition("SYMBIAN_CC"));
 
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
@@ -215,12 +177,4 @@ void cmGlobalSymbianMakefileGenerator
   entry.Name = this->GetName();
   entry.Brief = "Generates makefiles for Symbian SDK.";
   entry.Full = "";
-}
-
-std::string cmGlobalSymbianMakefileGenerator
-::GetStdLibPath() const
-{
-    std::string output;
-    cmSystemTools::RunCommand("arm-none-symbianelf-g++ -print-libgcc-file-name", output);
-    return cmSystemTools::GetFilenamePath(output);
 }
