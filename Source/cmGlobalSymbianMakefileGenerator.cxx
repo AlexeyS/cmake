@@ -1,5 +1,5 @@
 #include "cmGlobalSymbianMakefileGenerator.h"
-#include "cmLocalUnixMakefileGenerator3.h"
+#include "cmLocalSymbianMakefileGenerator.h"
 #include "cmMakefile.h"
 #include "cmXMLParser.h"
 
@@ -160,7 +160,7 @@ void cmGlobalSymbianMakefileGenerator
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalSymbianMakefileGenerator::CreateLocalGenerator()
 {
-  cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
+  cmLocalUnixMakefileGenerator3* lg = new cmLocalSymbianMakefileGenerator;
   lg->SetWindowsShell(true);
   lg->SetMakeSilentFlag("-s");
   lg->SetGlobalGenerator(this);

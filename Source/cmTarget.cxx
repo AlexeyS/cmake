@@ -747,7 +747,8 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   // Check whether this is a DLL platform.
   this->DLLPlatform = (this->Makefile->IsOn("WIN32") ||
                        this->Makefile->IsOn("CYGWIN") ||
-                       this->Makefile->IsOn("MINGW"));
+                       this->Makefile->IsOn("MINGW") ||
+                       this->Makefile->IsOn("SYMBIAN"));
 
   // Setup default property values.
   this->SetPropertyDefault("INSTALL_NAME_DIR", "");

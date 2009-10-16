@@ -256,8 +256,8 @@ IF (WIN32)
       cmGlobalMinGWMakefileGenerator.cxx
       cmGlobalNMakeMakefileGenerator.cxx
       cmGlobalNMakeMakefileGenerator.h
-	  cmGlobalSymbianMakefileGenerator.cxx
-	  cmGlobalSymbianMakefileGenerator.h
+      cmGlobalSymbianMakefileGenerator.cxx
+      cmGlobalSymbianMakefileGenerator.h
       cmGlobalVisualStudio6Generator.cxx
       cmGlobalVisualStudio6Generator.h
       cmGlobalVisualStudio71Generator.cxx
@@ -275,6 +275,8 @@ IF (WIN32)
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
       cmGlobalWatcomWMakeGenerator.cxx
+      cmLocalSymbianMakefileGenerator.cxx
+      cmLocalSymbianMakefileGenerator.h
       cmLocalVisualStudio6Generator.cxx
       cmLocalVisualStudio6Generator.h
       cmLocalVisualStudio7Generator.cxx
