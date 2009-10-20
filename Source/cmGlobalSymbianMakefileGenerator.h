@@ -28,6 +28,7 @@ public:
 
 private:
   bool SelectToolchain(cmMakefile* mf, const std::string& name);
+  static std::string SubstVariables(const std::string& str, cmMakefile *mf);
 
 private:
   std::string SDKPath;

@@ -77,13 +77,19 @@ cmGlobalSymbianMakefileGenerator::cmGlobalSymbianMakefileGenerator()
     }
 
   this->SDKPath = *parser.SDKs.begin();
+  cmSystemTools::ConvertToUnixSlashes(this->SDKPath);
+
+  if(!cmSystemTools::StringEndsWith(this->SDKPath.c_str(), "/"))
+    {
+    this->SDKPath += "/";
+    }
 }
 
 bool cmGlobalSymbianMakefileGenerator
 ::SelectToolchain(cmMakefile* mf, const std::string& name)
 {
   const std::string path = SDKPath +
-              "\\Epoc32\\tools\\compilation_config\\" + name + ".mk";
+              "Epoc32/tools/compilation_config/" + name + ".mk";
 
   std::ifstream f(path.c_str());
   if(!f)
@@ -117,7 +123,7 @@ bool cmGlobalSymbianMakefileGenerator
         if (eqPos != std::string::npos)
           {
           std::string varName = "SYMBIAN_" + line.substr(0, eqPos);
-          std::string varValue = line.substr(eqPos+1);
+          std::string varValue = SubstVariables(line.substr(eqPos+1), mf);
           mf->AddDefinition(varName.c_str(), varValue.c_str());
           }
         line.clear();
@@ -141,8 +147,9 @@ void cmGlobalSymbianMakefileGenerator
   mf->AddDefinition("CMAKE_SYSTEM", "Symbian");
   mf->AddDefinition("CMAKE_SYSTEM_NAME", "Symbian");
 
-  mf->AddDefinition("SYMBIAN_SDK_PATH", SDKPath.c_str());
+  mf->AddDefinition("SYMBIAN_EPOCROOT", SDKPath.c_str());
 
+  const char* test = mf->GetDefinition("SYMBIAN_EPOCROOT");
   if(!mf->GetDefinition("SYMBIAN_TOOLCHAIN"))
     {
     mf->AddCacheDefinition("SYMBIAN_TOOLCHAIN", "GCCE", "",
@@ -177,4 +184,30 @@ void cmGlobalSymbianMakefileGenerator
   entry.Name = this->GetName();
   entry.Brief = "Generates makefiles for Symbian SDK.";
   entry.Full = "";
+}
+
+std::string cmGlobalSymbianMakefileGenerator
+::SubstVariables(const std::string& str, cmMakefile *mf)
+{
+  std::string result = str;
+  std::string::size_type end = 0;
+  std::string::size_type start;
+
+  while((start = result.find("$(", end)) != std::string::npos)
+    {
+    end = result.find(')', start);
+    if(end == std::string::npos)
+      {
+          break;
+      }
+    std::string varName = "SYMBIAN_" + result.substr(start+2, end-start-2);
+    const char* varValue = mf->GetDefinition(varName.c_str());
+    if(varValue)
+      {
+      result.replace(start, end-start+1, varValue);
+      end = 0; // handle recursive substitutions
+      }
+    }
+
+  return result;
 }
