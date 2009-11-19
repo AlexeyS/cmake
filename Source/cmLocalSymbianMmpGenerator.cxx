@@ -457,7 +457,11 @@ void cmLocalSymbianMmpGenerator::WriteMakefile(cmTarget& target)
   mk << "bld:" << std::endl;
   for (size_t i = 0; i < target.GetSourceFiles().size(); ++i)
     {
-    this->WriteCustomCommand(*target.GetSourceFiles()[i]->GetCustomCommand(), mk);
+    cmCustomCommand* cmd = target.GetSourceFiles()[i]->GetCustomCommand();
+    if (cmd)
+      {
+      this->WriteCustomCommand(*cmd, mk);
+      }
     }
 
   mk << std::endl;
