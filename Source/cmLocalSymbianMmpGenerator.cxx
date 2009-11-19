@@ -71,9 +71,9 @@ void cmLocalSymbianMmpGenerator::WriteMmp(cmTarget& target)
 void cmLocalSymbianMmpGenerator::WriteHelperMakefile(cmTarget& target)
 {
   std::string filename = Makefile->GetStartOutputDirectory();
-  filename += "/";
+  filename += "/ext_";
   filename += target.GetName();
-  filename += "Utils.mk";
+  filename += ".mk";
   std::ofstream mk(filename.c_str());
   
   mk << "bld:" << std::endl;
@@ -451,7 +451,7 @@ void cmLocalSymbianMmpGenerator::WriteMakefile(cmTarget& target)
 {
   std::string targetName = target.GetName();
   std::string filename = Makefile->GetStartOutputDirectory();
-  filename += "/" + targetName + "Utils.mk";
+  filename += "/ext_" + targetName + ".mk";
   std::ofstream mk(filename.c_str());
 
   mk << "bld:" << std::endl;
