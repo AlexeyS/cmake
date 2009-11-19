@@ -71,8 +71,12 @@ void cmGlobalSymbianMmpGenerator::Generate()
 
       std::string prj = local->GetMakefile()->GetCurrentOutputDirectory();
       prj += (prj.length() > 0 ? "/" : "");
+      if (t->second.GetType() == cmTarget::UTILITY)
+        {
+        prj += "ext_";
+        }
       prj += t->first;
-      prj += (t->second.GetType() == cmTarget::UTILITY ? "Utils.mk" : ".mmp");
+      prj += (t->second.GetType() == cmTarget::UTILITY ? ".mk" : ".mmp");
       std::string componentPath = local->ConvertToRelativePath(basedir, prj.c_str());
       bld_inf << cmSystemTools::ConvertToOutputPath(componentPath.c_str());
       bld_inf << std::endl;
@@ -86,8 +90,9 @@ void cmGlobalSymbianMmpGenerator::Generate()
           {
               std::string helperMk = local->GetMakefile()->GetCurrentOutputDirectory();
               helperMk += (helperMk.length() > 0 ? "/" : "");
+              helperMk += "ext_";
               helperMk += t->first;
-              helperMk += "Utils.mk";
+              helperMk += ".mk";
               bld_inf << "gnumakefile ";
               std::string helperPath = local->ConvertToRelativePath(basedir,
                                                                     helperMk.c_str());
