@@ -76,7 +76,7 @@ void cmLocalSymbianMmpGenerator::WriteHelperMakefile(cmTarget& target)
   filename += ".mk";
   std::ofstream mk(filename.c_str());
   
-  mk << "bld:" << std::endl;
+  mk << "makmake:" << std::endl;
   for (size_t i = 0; i < target.GetPreBuildCommands().size(); ++i)
     {
     this->WriteCustomCommand(target.GetPreBuildCommands()[i], mk);
@@ -95,7 +95,7 @@ void cmLocalSymbianMmpGenerator::WriteHelperMakefile(cmTarget& target)
     }
   mk << std::endl;
 
-  mk << "makmake freeze lib cleanlib clean resource"
+  mk << "bld freeze lib cleanlib clean resource"
      << " savespace releaseables:" << std::endl;
 }
 
